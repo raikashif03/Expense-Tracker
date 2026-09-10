@@ -1,0 +1,160 @@
+<main class="budgets-viewport">
+
+  <!-- Top Global Header -->
+  <header class="top-nav-bar">
+    <div class="search-global-box">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search..." />
+    </div>
+
+    <div class="nav-right-actions">
+      <button class="icon-circle-btn" type="button" aria-label="Notifications">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+        <span class="material-symbols-outlined">calendar_today</span>
+      </button>
+      <button class="btn-primary-add" type="button" (click)="openAddModal()">
+        <span class="material-symbols-outlined plus-icon">add</span>
+        <span>Add Transaction</span>
+      </button>
+      <div class="user-avatar-ring">
+        <img [src]="user.avatar" alt="User Profile" />
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Title & Create Budget Button -->
+  <div class="page-title-section">
+    <div>
+      <h1 class="page-heading">Budgets</h1>
+      <p class="page-subheading">Set spending limits and stay on track.</p>
+    </div>
+
+    <button class="btn-create-budget" type="button">
+      <span class="material-symbols-outlined plus-icon">add</span>
+      <span>Create Budget</span>
+    </button>
+  </div>
+
+  <!-- Budgets Grid -->
+  <section class="budgets-grid">
+
+    <!-- Card 1: Food & Dining (Normal / Blue) -->
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="category-meta">
+          <div class="cat-icon-box icon-blue">
+            <span class="material-symbols-outlined">restaurant</span>
+          </div>
+          <div>
+            <h2 class="cat-name">Food & Dining</h2>
+            <span class="cat-period">MONTHLY</span>
+          </div>
+        </div>
+        <button class="card-menu-btn" type="button">
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+      </div>
+
+      <div class="spend-summary">
+        <div class="amount-main">
+          <span class="spent">€320</span>
+          <span class="total">/ €500</span>
+        </div>
+        <span class="pct-badge pct-blue">64% used</span>
+      </div>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill fill-blue" style="width: 64%;"></div>
+      </div>
+
+      <div class="remaining-row">
+        <span class="rem-label">Remaining</span>
+        <span class="rem-val">€180</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Transport (Warning / Yellow) -->
+    <div class="budget-card">
+      <div class="budget-card-header">
+        <div class="category-meta">
+          <div class="cat-icon-box icon-yellow">
+            <span class="material-symbols-outlined">directions_car</span>
+          </div>
+          <div>
+            <h2 class="cat-name">Transport</h2>
+            <span class="cat-period">MONTHLY</span>
+          </div>
+        </div>
+        <button class="card-menu-btn" type="button">
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+      </div>
+
+      <div class="spend-summary">
+        <div class="amount-main">
+          <span class="spent">€230</span>
+          <span class="total">/ €250</span>
+        </div>
+        <span class="pct-badge pct-yellow">92% used</span>
+      </div>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill fill-yellow" style="width: 92%;"></div>
+      </div>
+
+      <div class="remaining-row">
+        <span class="rem-label">Remaining</span>
+        <span class="rem-val">€20</span>
+      </div>
+
+      <div class="alert-banner alert-warning">
+        <span class="material-symbols-outlined alert-icon">warning</span>
+        <span>You're close to your limit.</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Shopping (Exceeded / Red) -->
+    <div class="budget-card card-danger-border">
+      <div class="budget-card-header">
+        <div class="category-meta">
+          <div class="cat-icon-box icon-red">
+            <span class="material-symbols-outlined">shopping_bag</span>
+          </div>
+          <div>
+            <h2 class="cat-name">Shopping</h2>
+            <span class="cat-period">MONTHLY</span>
+          </div>
+        </div>
+        <button class="card-menu-btn" type="button">
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+      </div>
+
+      <div class="spend-summary">
+        <div class="amount-main">
+          <span class="spent spent-danger">€350</span>
+          <span class="total">/ €300</span>
+        </div>
+        <span class="pct-badge pct-red">116% used</span>
+      </div>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill fill-red" style="width: 100%;"></div>
+      </div>
+
+      <div class="remaining-row">
+        <span class="rem-label">Remaining</span>
+        <span class="rem-val text-danger">-€50</span>
+      </div>
+
+      <div class="alert-banner alert-danger">
+        <span class="material-symbols-outlined alert-icon">error</span>
+        <span>Budget exceeded by €50.</span>
+      </div>
+    </div>
+
+  </section>
+
+</main>

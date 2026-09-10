@@ -1,0 +1,52 @@
+<aside class="sidebar">
+  <div class="brand">
+    <h1 class="logo">FinTrack</h1>
+    <span class="tagline">WEALTH MANAGEMENT</span>
+  </div>
+
+ <button class="btn-add-transaction" type="button" (click)="openAddModal()">
+  <span class="material-symbols-outlined plus-icon">add</span>
+  <span>Add Transaction</span>
+</button>
+
+  <nav class="nav-menu">
+    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
+      <span class="material-symbols-outlined">grid_view</span>
+      <span>Dashboard</span>
+    </a>
+
+    <a class="nav-link" routerLink="/transactions" routerLinkActive="active">
+      <span class="material-symbols-outlined">receipt_long</span>
+      <span>Transactions</span>
+    </a>
+
+   <a class="nav-link" routerLink="/analytics" routerLinkActive="active">
+  <span class="material-symbols-outlined">query_stats</span>
+  <span>Analytics</span>
+</a>
+    <a class="nav-link" routerLink="/budget" routerLinkActive="active">
+  <span class="material-symbols-outlined">account_balance_wallet</span>
+  <span>Budgets</span>
+     </a>
+   <a class="nav-link" routerLink="/categories" routerLinkActive="active">
+  <span class="material-symbols-outlined">category</span>
+  <span>Categories</span>
+</a>
+
+    <a class="nav-link">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <a class="nav-link">
+      <span class="material-symbols-outlined">account_circle</span>
+      <span>Profile</span>
+    </a>
+    <a class="nav-link">
+      <span class="material-symbols-outlined">dark_mode</span>
+      <span>Dark Mode</span>
+    </a>
+  </div>
+</aside>

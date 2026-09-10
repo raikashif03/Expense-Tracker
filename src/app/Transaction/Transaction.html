@@ -1,0 +1,131 @@
+<main class="transactions-viewport">
+
+  <header class="top-nav-bar">
+    <div class="search-global-box">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search transactions..." />
+    </div>
+
+    <div class="nav-right-actions">
+      <button class="icon-circle-btn" type="button" aria-label="Notifications">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+        <span class="material-symbols-outlined">calendar_today</span>
+      </button>
+     <button class="btn-primary-add" type="button" (click)="openAddModal()">
+  <span>Add Transaction</span>
+</button>
+      <div class="user-avatar-ring">
+        <img [src]="user.avatar" alt="User Profile" />
+      </div>
+    </div>
+  </header>
+
+  <div class="page-title-section">
+    <h1 class="page-heading">Transactions</h1>
+    <p class="page-subheading">Manage and review all your income and expenses.</p>
+  </div>
+
+  <section class="filters-card">
+    <div class="filter-search-input">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
+    </div>
+
+    <div class="filter-select-box">
+      <span>{{ selectedType }}</span>
+      <span class="material-symbols-outlined">expand_more</span>
+    </div>
+
+    <div class="filter-select-box">
+      <span>{{ selectedCategory }}</span>
+      <span class="material-symbols-outlined">expand_more</span>
+    </div>
+
+    <div class="filter-select-box">
+      <span>{{ selectedPeriod }}</span>
+      <span class="material-symbols-outlined icon-end">calendar_month</span>
+    </div>
+
+    <div class="filter-select-box">
+      <span>{{ sortOrder }}</span>
+      <span class="material-symbols-outlined icon-end">sort</span>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="table-frame">
+      <table class="transactions-data-table">
+        <thead>
+          <tr>
+            <th class="col-checkbox">
+              <input type="checkbox" (change)="toggleSelectAll($event)" />
+            </th>
+            <th class="col-title">TRANSACTION</th>
+            <th>CATEGORY</th>
+            <th>DATE</th>
+            <th>METHOD</th>
+            <th class="align-right">AMOUNT</th>
+            <th class="align-center">STATUS</th>
+            <th class="align-center">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of transactionsList">
+            <td class="col-checkbox">
+              <input type="checkbox" [checked]="item.selected" (change)="item.selected = !item.selected" />
+            </td>
+            <td>
+              <div class="item-title-meta">
+                <div class="type-icon-box" [style.background]="item.iconBg" [style.color]="item.iconColor">
+                  <span class="material-symbols-outlined">{{ item.icon }}</span>
+                </div>
+                <span class="tx-name">{{ item.name }}</span>
+              </div>
+            </td>
+            <td class="cell-category">{{ item.category }}</td>
+            <td class="cell-muted">{{ item.date }}</td>
+            <td class="cell-muted">{{ item.method }}</td>
+            <td class="align-right">
+              <span class="amount-val" [ngClass]="item.amount > 0 ? 'positive-amt' : 'negative-amt'">
+                {{ item.amount > 0 ? '+' : '-' }}€{{ getAbs(item.amount) | number:'1.2-2' }}
+              </span>
+            </td>
+            <td class="align-center">
+              <span class="badge-status" [ngClass]="item.status.toLowerCase()">
+                {{ item.status }}
+              </span>
+            </td>
+            <td class="align-center">
+              <button class="row-menu-btn" type="button">
+                <span class="material-symbols-outlined">more_horiz</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="pagination-footer">
+      <span class="pagination-summary">
+        Showing <strong>1</strong> to <strong>{{ transactionsList.length }}</strong> of <strong>128</strong> entries
+      </span>
+
+      <div class="pagination-controls">
+        <button class="pager-btn" type="button" disabled>
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <button class="pager-btn active" type="button">1</button>
+        <button class="pager-btn" type="button">2</button>
+        <button class="pager-btn" type="button">3</button>
+        <span class="pager-ellipsis">...</span>
+        <button class="pager-btn" type="button">12</button>
+        <button class="pager-btn" type="button">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </footer>
+  </section>
+
+</main>

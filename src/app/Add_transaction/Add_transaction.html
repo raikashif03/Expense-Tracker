@@ -1,0 +1,136 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="close()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Add Transaction</h2>
+      <button type="button" class="btn-close" (click)="close()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+      <!-- Expense/Income Switcher (Empty/Unselected by default) -->
+      <div class="toggle-pill">
+        <button 
+          type="button" 
+          [class.active]="type === 'Expense'" 
+          (click)="type = 'Expense'">Expense</button>
+        <button 
+          type="button" 
+          [class.active]="type === 'Income'" 
+          (click)="type = 'Income'">Income</button>
+      </div>
+      <p class="error-msg" *ngIf="isSubmitted && !type">
+        <span class="material-symbols-outlined icon-warn">error</span>
+        Please select Expense or Income.
+      </p>
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label class="form-label">Amount *</label>
+        <div class="input-prefix-box" [class.input-error]="isSubmitted && (!amount || amount <= 0)">
+          <span class="prefix">€</span>
+          <input 
+            type="number" 
+            placeholder="0.00" 
+            [(ngModel)]="amount" 
+            step="0.01" 
+            min="0" />
+        </div>
+        <p class="error-msg" *ngIf="isSubmitted && (!amount || amount <= 0)">
+          <span class="material-symbols-outlined icon-warn">error</span>
+          Amount is required.
+        </p>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          [class.input-error]="isSubmitted && !description.trim()"
+          placeholder="What was this transaction for?" 
+          [(ngModel)]="description" />
+        <p class="error-msg" *ngIf="isSubmitted && !description.trim()">
+          <span class="material-symbols-outlined icon-warn">error</span>
+          Description is required.
+        </p>
+      </div>
+
+      <!-- Category & Date Dual Row -->
+      <div class="form-row">
+        <div class="form-group col-half">
+          <label class="form-label">Category *</label>
+          <div class="select-wrapper">
+            <select class="form-control select-input" [class.input-error]="isSubmitted && !category" [(ngModel)]="category">
+              <option value="" disabled selected>Select category</option>
+              <option value="Food & Dining">Food & Dining</option>
+              <option value="Transportation">Transportation</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Salary / Income">Salary / Income</option>
+              <option value="Other">Other</option>
+            </select>
+            <span class="material-symbols-outlined select-arrow">expand_more</span>
+          </div>
+          <p class="error-msg" *ngIf="isSubmitted && !category">
+            <span class="material-symbols-outlined icon-warn">error</span>
+            Category is required.
+          </p>
+        </div>
+
+        <div class="form-group col-half">
+          <label class="form-label">Date *</label>
+          <input 
+            type="date" 
+            class="form-control" 
+            [class.input-error]="isSubmitted && !date"
+            [(ngModel)]="date" />
+          <p class="error-msg" *ngIf="isSubmitted && !date">
+            <span class="material-symbols-outlined icon-warn">error</span>
+            Date is required.
+          </p>
+        </div>
+      </div>
+
+      <!-- Payment Method (No default) -->
+      <div class="form-group">
+        <label class="form-label">Payment Method *</label>
+        <div class="select-wrapper">
+          <select class="form-control select-input" [class.input-error]="isSubmitted && !method" [(ngModel)]="method">
+            <option value="" disabled selected>Select payment method</option>
+            <option value="Credit Card (**** 1234)">Credit Card (**** 1234)</option>
+            <option value="Card •••• 4242">Card •••• 4242</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cash">Cash</option>
+          </select>
+          <span class="material-symbols-outlined select-arrow">expand_more</span>
+        </div>
+        <p class="error-msg" *ngIf="isSubmitted && !method">
+          <span class="material-symbols-outlined icon-warn">error</span>
+          Payment method is required.
+        </p>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea 
+          class="form-control textarea-input" 
+          rows="3" 
+          placeholder="Add any additional details..." 
+          [(ngModel)]="notes"></textarea>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="close()">Cancel</button>
+      <button type="button" class="btn-submit" (click)="save()">Add Transaction</button>
+    </div>
+
+  </div>
+</div>
