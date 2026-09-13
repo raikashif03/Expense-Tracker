@@ -15,16 +15,15 @@ export class AddTransaction implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
   private sub!: Subscription;
 
-  isOpen: boolean = false;
-
-  type: 'Expense' | 'Income' | null = null;
+  isOpen = false;
+  type: 'Expense' | 'Income' = 'Expense';
   amount: number | null = null;
-  description: string = '';
-  category: string = '';
-  date: string = '';
-  method: string = '';
-  notes: string = '';
-  isSubmitted: boolean = false;
+  description = '';
+  category = '';
+  date = '';
+  method = '';
+  notes = '';
+  isSubmitted = false;
 
   ngOnInit(): void {
     this.sub = this.txService.isModalOpen$.subscribe(state => {
@@ -33,9 +32,7 @@ export class AddTransaction implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    if (this.sub) this.sub.unsubscribe();
   }
 
   close(): void {
@@ -45,29 +42,47 @@ export class AddTransaction implements OnInit, OnDestroy {
 
   save(): void {
     this.isSubmitted = true;
-
-    if (!this.type || !this.amount || this.amount <= 0 || !this.description.trim() || !this.category || !this.method || !this.date) {
+    if (!this.type || !this.amount || this.amount <= 0 || !this.description.trim() || !this.category || !this.date || !this.method) {
       return;
     }
 
     const isExpense = this.type === 'Expense';
     const computedAmount = isExpense ? -Math.abs(this.amount) : Math.abs(this.amount);
 
-    let icon = 'receipt';
+    const normCat = this.txService.normalizeCategory(this.category);
+    let finalCategoryName = this.category;
+    let icon = 'receipt_long';
     let iconBg = '#f1f5f9';
     let iconColor = '#475569';
 
-    if (this.category === 'Food & Dining') {
-      icon = 'shopping_cart'; iconBg = '#ede9fe'; iconColor = '#6366f1';
-    } else if (this.category === 'Transportation') {
-      icon = 'local_gas_station'; iconBg = '#e0e7ff'; iconColor = '#3b3bf5';
-    } else if (this.category === 'Entertainment') {
-      icon = 'movie'; iconBg = '#ffe4e6'; iconColor = '#f43f5e';
-    } else if (this.type === 'Income' || this.category === 'Salary / Income') {
-      icon = 'payments'; iconBg = '#dcfce7'; iconColor = '#10b981';
+    if (normCat === 'shopping') {
+      finalCategoryName = 'Shopping';
+      icon = 'shopping_bag';
+      iconBg = '#dcfce7';
+      iconColor = '#059669';
+    } else if (normCat === 'food & dining') {
+      finalCategoryName = 'Food & Dining';
+      icon = 'restaurant';
+      iconBg = '#ede9fe';
+      iconColor = '#6366f1';
+    } else if (normCat === 'transport') {
+      finalCategoryName = 'Transport';
+      icon = 'directions_car';
+      iconBg = '#ffe4e6';
+      iconColor = '#881337';
+    } else if (normCat === 'income') {
+      finalCategoryName = 'Income';
+      icon = 'payments';
+      iconBg = '#d1fae5';
+      iconColor = '#10b981';
+    } else if (normCat === 'entertainment') {
+      finalCategoryName = 'Entertainment';
+      icon = 'movie';
+      iconBg = '#fee2e2';
+      iconColor = '#ef4444';
     }
 
-    const formattedDate = new Date(this.date).toLocaleDateString('en-US', {
+    const parsedDate = new Date(this.date).toLocaleDateString('en-US', {
       month: 'short',
       day: '2-digit',
       year: 'numeric'
@@ -75,8 +90,8 @@ export class AddTransaction implements OnInit, OnDestroy {
 
     this.txService.addTransaction({
       name: this.description.trim(),
-      category: this.category,
-      date: formattedDate,
+      category: finalCategoryName,
+      date: parsedDate,
       method: this.method,
       amount: computedAmount,
       icon,
@@ -88,7 +103,7 @@ export class AddTransaction implements OnInit, OnDestroy {
   }
 
   private resetForm(): void {
-    this.type = null;
+    this.type = 'Expense';
     this.amount = null;
     this.description = '';
     this.category = '';

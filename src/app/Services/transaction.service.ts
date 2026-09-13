@@ -15,69 +15,82 @@ export interface TransactionItem {
   iconColor: string;
 }
 
+export interface CategoryItem {
+  id: string;
+  name: string;
+  transactionsCount: number;
+  spentAmount: number;
+  type: 'spent' | 'earned';
+  icon: string;
+  iconBg: string;
+  iconColor: string;
+}
+
+export interface BudgetItem {
+  id: string;
+  category: string;
+  period: string;
+  allocated: number;
+  icon: string;
+  iconTheme: 'blue' | 'yellow' | 'red';
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class TransactionService {
+  private readonly TX_KEY = 'fintrack_tx_clean_v5';
+  private readonly CAT_KEY = 'fintrack_cat_clean_v5';
+  private readonly BUD_KEY = 'fintrack_bud_clean_v5';
+
   private isModalOpenSubject = new BehaviorSubject<boolean>(false);
   isModalOpen$ = this.isModalOpenSubject.asObservable();
 
-  private transactionsSubject = new BehaviorSubject<TransactionItem[]>([
-    {
-      id: 'tx-1',
-      selected: false,
-      name: 'Carrefour',
-      category: 'Food & Dining',
-      date: 'Aug 31, 2023',
-      method: 'Card •••• 4242',
-      amount: -54.80,
-      status: 'Completed',
-      icon: 'shopping_cart',
-      iconBg: '#ede9fe',
-      iconColor: '#6366f1'
-    },
-    {
-      id: 'tx-2',
-      selected: false,
-      name: 'Salary',
-      category: 'Income',
-      date: 'Aug 30, 2023',
-      method: 'Bank Transfer',
-      amount: 2500.00,
-      status: 'Completed',
-      icon: 'payments',
-      iconBg: '#dcfce7',
-      iconColor: '#10b981'
-    },
-    {
-      id: 'tx-3',
-      selected: false,
-      name: 'Netflix',
-      category: 'Entertainment',
-      date: 'Aug 28, 2023',
-      method: 'Card •••• 4242',
-      amount: -17.99,
-      status: 'Completed',
-      icon: 'movie',
-      iconBg: '#ffe4e6',
-      iconColor: '#f43f5e'
-    },
-    {
-      id: 'tx-4',
-      selected: false,
-      name: 'Shell Station',
-      category: 'Transportation',
-      date: 'Aug 25, 2023',
-      method: 'Card •••• 4242',
-      amount: -42.50,
-      status: 'Completed',
-      icon: 'local_gas_station',
-      iconBg: '#e0e7ff',
-      iconColor: '#3b3bf5'
-    }
-  ]);
-
+  private transactionsSubject = new BehaviorSubject<TransactionItem[]>(
+    this.loadStorage(this.TX_KEY, [])
+  );
   transactions$ = this.transactionsSubject.asObservable();
+
+  private categoriesSubject = new BehaviorSubject<CategoryItem[]>(
+    this.loadStorage(this.CAT_KEY, [
+      { id: 'cat-1', name: 'Food & Dining', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'restaurant', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-2', name: 'Transport', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'directions_car', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-3', name: 'Shopping', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'shopping_bag', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-4', name: 'Bills & Utilities', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'receipt_long', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-5', name: 'Entertainment', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'movie', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-6', name: 'Health & Wellness', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'favorite', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-7', name: 'Education', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'school', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-8', name: 'Travel', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'flight', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-9', name: 'Income', transactionsCount: 0, spentAmount: 0, type: 'earned', icon: 'payments', iconBg: '#dcfce7', iconColor: '#10b981' }
+    ])
+  );
+  categories$ = this.categoriesSubject.asObservable();
+
+  private budgetsSubject = new BehaviorSubject<BudgetItem[]>(
+    this.loadStorage(this.BUD_KEY, [
+      { id: 'b-1', category: 'Food & Dining', period: 'MONTHLY', allocated: 500, icon: 'restaurant', iconTheme: 'blue' },
+      { id: 'b-2', category: 'Transport', period: 'MONTHLY', allocated: 250, icon: 'directions_car', iconTheme: 'yellow' },
+      { id: 'b-3', category: 'Shopping', period: 'MONTHLY', allocated: 300, icon: 'shopping_bag', iconTheme: 'red' }
+    ])
+  );
+  budgets$ = this.budgetsSubject.asObservable();
+
+  constructor() {
+    this.syncCategoryTotals();
+  }
+
+  private loadStorage<T>(key: string, fallback: T): T {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  private saveStorage(key: string, data: any): void {
+    localStorage.setItem(key, JSON.stringify(data));
+  }
 
   openModal(): void {
     this.isModalOpenSubject.next(true);
@@ -94,7 +107,136 @@ export class TransactionService {
       selected: false,
       status: 'Completed'
     };
-    const current = this.transactionsSubject.getValue();
-    this.transactionsSubject.next([newTx, ...current]);
+    const updated = [newTx, ...this.transactionsSubject.getValue()];
+    this.transactionsSubject.next(updated);
+    this.saveStorage(this.TX_KEY, updated);
+    this.syncCategoryTotals();
+  }
+
+  deleteTransaction(id: string): void {
+    const updated = this.transactionsSubject.getValue().filter(t => t.id !== id);
+    this.transactionsSubject.next(updated);
+    this.saveStorage(this.TX_KEY, updated);
+    this.syncCategoryTotals();
+  }
+
+  saveCategory(item: CategoryItem): void {
+    const current = this.categoriesSubject.getValue();
+    const index = current.findIndex(c => c.id === item.id);
+    const updated = index > -1
+      ? current.map((c, i) => (i === index ? item : c))
+      : [...current, item];
+    this.categoriesSubject.next(updated);
+    this.saveStorage(this.CAT_KEY, updated);
+  }
+
+  deleteCategory(id: string): void {
+    const cat = this.categoriesSubject.getValue().find(c => c.id === id);
+    const updated = this.categoriesSubject.getValue().filter(c => c.id !== id);
+    this.categoriesSubject.next(updated);
+    this.saveStorage(this.CAT_KEY, updated);
+
+    if (cat) {
+      const txs = this.transactionsSubject.getValue().map(t => {
+        if (this.normalizeCategory(t.category) === this.normalizeCategory(cat.name)) {
+          return { ...t, category: 'Other' };
+        }
+        return t;
+      });
+      this.transactionsSubject.next(txs);
+      this.saveStorage(this.TX_KEY, txs);
+    }
+  }
+
+  normalizeCategory(cat: string): string {
+    const lower = (cat || '').toLowerCase().trim();
+    if (lower.includes('transport')) return 'transport';
+    if (lower.includes('food') || lower.includes('dining')) return 'food & dining';
+    if (lower.includes('income') || lower.includes('salary')) return 'income';
+    if (lower.includes('shop') || lower.includes('shoop')) return 'shopping';
+    if (lower.includes('bill') || lower.includes('util')) return 'bills & utilities';
+    if (lower.includes('entertain') || lower.includes('movie')) return 'entertainment';
+    if (lower.includes('health') || lower.includes('well')) return 'health & wellness';
+    if (lower.includes('edu') || lower.includes('school')) return 'education';
+    if (lower.includes('travel') || lower.includes('flight')) return 'travel';
+    return lower;
+  }
+
+  syncCategoryTotals(): void {
+    const txs = this.transactionsSubject.getValue();
+    const cats = this.categoriesSubject.getValue().map(cat => {
+      const normCatName = this.normalizeCategory(cat.name);
+      const matchingTxs = txs.filter(t => this.normalizeCategory(t.category) === normCatName);
+      const sum = matchingTxs.reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
+      return {
+        ...cat,
+        transactionsCount: matchingTxs.length,
+        spentAmount: sum
+      };
+    });
+    this.categoriesSubject.next(cats);
+    this.saveStorage(this.CAT_KEY, cats);
+  }
+
+  getTotalIncome(): number {
+    return this.transactionsSubject.getValue()
+      .filter(t => t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }
+
+  getTotalExpense(): number {
+    return this.transactionsSubject.getValue()
+      .filter(t => t.amount < 0)
+      .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  }
+
+  getTotalBalance(): number {
+    return this.getTotalIncome() - this.getTotalExpense();
+  }
+
+  getSavingsRate(): number {
+    const income = this.getTotalIncome();
+    if (income <= 0) return 0;
+    const rate = ((income - this.getTotalExpense()) / income) * 100;
+    return Math.max(0, Math.round(rate * 10) / 10);
+  }
+
+  getCategoryBreakdown(): { name: string; amount: number; percentage: number; color: string }[] {
+    const totalExp = this.getTotalExpense();
+    const grouped = new Map<string, number>();
+
+    this.transactionsSubject.getValue()
+      .filter(t => t.amount < 0)
+      .forEach(t => {
+        const norm = this.normalizeCategory(t.category);
+        let key = t.category || 'Other';
+        if (norm === 'transport') key = 'Transport';
+        if (norm === 'food & dining') key = 'Food & Dining';
+        if (norm === 'shopping') key = 'Shopping';
+        if (norm === 'entertainment') key = 'Entertainment';
+        if (norm === 'bills & utilities') key = 'Bills & Utilities';
+        if (norm === 'health & wellness') key = 'Health & Wellness';
+        if (norm === 'education') key = 'Education';
+        if (norm === 'travel') key = 'Travel';
+
+        grouped.set(key, (grouped.get(key) || 0) + Math.abs(t.amount));
+      });
+
+    const palette = ['#881337', '#3b3bf5', '#059669', '#d97706', '#6366f1', '#ec4899'];
+    let idx = 0;
+
+    return Array.from(grouped.entries())
+      .map(([name, amount]) => ({
+        name,
+        amount,
+        percentage: totalExp > 0 ? Math.round((amount / totalExp) * 100) : 0,
+        color: palette[idx++ % palette.length]
+      }))
+      .sort((a, b) => b.amount - a.amount);
+  }
+
+  getLargestExpense(): { name: string; amount: number; percentage: number } {
+    const list = this.getCategoryBreakdown();
+    return list.length > 0 ? list[0] : { name: 'None', amount: 0, percentage: 0 };
   }
 }

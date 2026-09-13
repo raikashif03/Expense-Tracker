@@ -1,8 +1,13 @@
+* {
+  box-sizing: border-box;
+}
+
+/* Modal Overlay */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(30, 41, 59, 0.45);
-  backdrop-filter: blur(2px);
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,14 +16,15 @@
 
 .modal-dialog {
   background: #ffffff;
-  border-radius: 12px;
-  width: 480px;
+  border-radius: 14px;
+  width: 490px;
   max-width: 92vw;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: popIn 0.15s ease-out;
+  border: 1px solid #e2e8f0;
+  animation: popIn 0.16s ease-out;
 }
 
 @keyframes popIn {
@@ -27,7 +33,7 @@
 }
 
 .modal-header {
-  padding: 16px 20px;
+  padding: 18px 22px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,7 +41,7 @@
 }
 
 .modal-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: #0f172a;
 }
@@ -48,45 +54,54 @@
   display: flex;
   align-items: center;
   padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-close:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .modal-body {
-  padding: 18px 20px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* Switcher / Toggle */
 .toggle-pill {
   display: grid;
   grid-template-columns: 1fr 1fr;
   background: #f1f5f9;
-  padding: 3px;
+  padding: 4px;
   border-radius: 8px;
+  border: 1px solid transparent;
 }
 
 .toggle-pill button {
   border: none;
   background: transparent;
-  padding: 7px 0;
-  font-size: 12.5px;
+  padding: 8px 0;
+  font-size: 13px;
   font-weight: 600;
-  color: #475569;
+  color: #64748b;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .toggle-pill button.active {
   background: #ffffff;
-  color: #3b3bf5;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  color: var(--primary-color, #3b3bf5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .form-row {
@@ -99,7 +114,7 @@
 }
 
 .form-label {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #334155;
 }
@@ -107,26 +122,45 @@
 .form-control {
   width: 100%;
   border: 1.5px solid #cbd5e1;
-  border-radius: 7px;
-  padding: 8px 11px;
-  font-size: 12.5px;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
   color: #0f172a;
   outline: none;
   background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control::placeholder {
+  color: #94a3b8;
 }
 
 .form-control:focus {
-  border-color: #3b3bf5;
+  border-color: var(--primary-color, #3b3bf5);
+  box-shadow: 0 0 0 3px rgba(59, 59, 245, 0.12);
 }
 
+/* Prefix Box for Amount */
 .input-prefix-box {
   display: flex;
   align-items: center;
   border: 1.5px solid #cbd5e1;
-  border-radius: 7px;
-  padding: 0 11px;
-  height: 36px;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 40px;
   background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-prefix-box:focus-within {
+  border-color: var(--primary-color, #3b3bf5);
+  box-shadow: 0 0 0 3px rgba(59, 59, 245, 0.12);
+}
+
+.prefix {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .input-prefix-box input {
@@ -135,11 +169,17 @@
   width: 100%;
   font-size: 13px;
   margin-left: 6px;
+  background: transparent;
+  color: #0f172a;
+}
+
+.input-prefix-box input::placeholder {
+  color: #94a3b8;
 }
 
 .input-prefix-box.input-error,
 .form-control.input-error {
-  border-color: #ef4444;
+  border-color: #ef4444 !important;
 }
 
 .error-msg {
@@ -147,69 +187,241 @@
   color: #ef4444;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   margin-top: 2px;
 }
 
 .icon-warn {
-  font-size: 13px;
+  font-size: 14px;
 }
 
+/* Custom Select Dropdowns */
 .select-wrapper {
   position: relative;
+  width: 100%;
 }
 
 .select-input {
   appearance: none;
-  padding-right: 28px;
+  -webkit-appearance: none;
+  padding-right: 32px;
   cursor: pointer;
 }
 
 .select-arrow {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  font-size: 18px;
+  font-size: 19px;
   color: #64748b;
 }
 
 .textarea-input {
   resize: vertical;
-  min-height: 55px;
+  min-height: 65px;
+  font-family: inherit;
+}
+
+.textarea-input::placeholder {
+  color: #94a3b8;
 }
 
 .modal-footer {
-  padding: 12px 20px;
+  padding: 14px 22px;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
   border-top: 1px solid #f1f5f9;
+  background: #fafafa;
 }
 
 .btn-cancel {
   border: 1.5px solid #cbd5e1;
   background: #ffffff;
   color: #334155;
-  border-radius: 7px;
-  padding: 7px 16px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cancel:hover {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .btn-submit {
   border: none;
-  background: #312e81;
+  background-color: var(--primary-color, #3b3bf5);
   color: #ffffff;
-  border-radius: 7px;
-  padding: 7px 18px;
-  font-size: 12px;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
 .btn-submit:hover {
-  background: #1e1b4b;
+  background-color: var(--primary-hover, #2e2ed8);
+}
+
+/* ========================================================
+   DARK MODE OVERRIDES
+   Uses :host-context to safely bypass Angular Encapsulation
+   ======================================================== */
+
+/* Modal Dialog & Header */
+:host-context(body.dark-mode) .modal-dialog,
+body.dark-mode .modal-dialog {
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+:host-context(body.dark-mode) .modal-header,
+body.dark-mode .modal-header {
+  border-bottom: 1px solid #1e293b !important;
+}
+
+:host-context(body.dark-mode) .modal-title,
+body.dark-mode .modal-title {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .btn-close,
+body.dark-mode .btn-close {
+  color: #94a3b8 !important;
+}
+
+:host-context(body.dark-mode) .btn-close:hover,
+body.dark-mode .btn-close:hover {
+  color: #ffffff !important;
+}
+
+/* 1. Outside labels must be pure white */
+:host-context(body.dark-mode) .form-label,
+body.dark-mode .form-label {
+  color: #ffffff !important;
+}
+
+/* 2. All input boxes dark mode background and white text */
+:host-context(body.dark-mode) .form-control,
+:host-context(body.dark-mode) .input-prefix-box,
+:host-context(body.dark-mode) select.form-control,
+:host-context(body.dark-mode) .textarea-input,
+body.dark-mode .form-control,
+body.dark-mode .input-prefix-box,
+body.dark-mode select.form-control,
+body.dark-mode .textarea-input {
+  background: #162238 !important;
+  border: 1px solid #22324e !important;
+  color: #ffffff !important;
+  color-scheme: dark !important;
+}
+
+:host-context(body.dark-mode) .input-prefix-box input,
+body.dark-mode .input-prefix-box input {
+  color: #ffffff !important;
+  background: transparent !important;
+}
+
+:host-context(body.dark-mode) .prefix,
+body.dark-mode .prefix {
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) select.form-control option,
+body.dark-mode select.form-control option {
+  background: #162238 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .select-arrow,
+body.dark-mode .select-arrow {
+  color: #ffffff !important;
+}
+
+/* 3. Placeholders must be clearly white */
+:host-context(body.dark-mode) input::placeholder,
+:host-context(body.dark-mode) textarea::placeholder,
+:host-context(body.dark-mode) .form-control::placeholder,
+:host-context(body.dark-mode) .input-prefix-box input::placeholder,
+:host-context(body.dark-mode) .textarea-input::placeholder,
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder,
+body.dark-mode .form-control::placeholder,
+body.dark-mode .input-prefix-box input::placeholder,
+body.dark-mode .textarea-input::placeholder {
+  color: #ffffff !important;
+  opacity: 0.85 !important;
+}
+
+:host-context(body.dark-mode) input::-webkit-input-placeholder,
+:host-context(body.dark-mode) textarea::-webkit-input-placeholder,
+body.dark-mode input::-webkit-input-placeholder,
+body.dark-mode textarea::-webkit-input-placeholder {
+  color: #ffffff !important;
+  opacity: 0.85 !important;
+}
+
+:host-context(body.dark-mode) input::-moz-placeholder,
+:host-context(body.dark-mode) textarea::-moz-placeholder,
+body.dark-mode input::-moz-placeholder,
+body.dark-mode textarea::-moz-placeholder {
+  color: #ffffff !important;
+  opacity: 0.85 !important;
+}
+
+/* 4. Expense & Income switcher */
+:host-context(body.dark-mode) .toggle-pill,
+body.dark-mode .toggle-pill {
+  background: #131c2e !important;
+  border: 1px solid #22324e !important;
+}
+
+:host-context(body.dark-mode) .toggle-pill button,
+body.dark-mode .toggle-pill button {
+  color: #94a3b8 !important;
+}
+
+:host-context(body.dark-mode) .toggle-pill button.active,
+body.dark-mode .toggle-pill button.active {
+  background: #ffffff !important;
+  color: var(--primary-color, #3b3bf5) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 5. Footer background is dark, and buttons retain their exact styling */
+:host-context(body.dark-mode) .modal-footer,
+body.dark-mode .modal-footer {
+  background: #0b1120 !important;
+  border-top: 1px solid #1e293b !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel,
+body.dark-mode .btn-cancel {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .btn-cancel:hover,
+body.dark-mode .btn-cancel:hover {
+  background: #27354a !important;
+}
+
+:host-context(body.dark-mode) .btn-submit,
+body.dark-mode .btn-submit {
+  background-color: var(--primary-color, #3b3bf5) !important;
+  color: #ffffff !important;
+}
+
+:host-context(body.dark-mode) .btn-submit:hover,
+body.dark-mode .btn-submit:hover {
+  background-color: var(--primary-hover, #2e2ed8) !important;
 }

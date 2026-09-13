@@ -1,52 +1,73 @@
-<aside class="sidebar">
-  <div class="brand">
-    <h1 class="logo">FinTrack</h1>
-    <span class="tagline">WEALTH MANAGEMENT</span>
+<aside class="sidebar-shell">
+
+  <!-- Top Section: Brand & Primary Action -->
+  <div class="sidebar-top">
+    <!-- Brand Logo -->
+    <div class="brand-header">
+      <div class="brand-logo-icon">
+        <span class="material-symbols-outlined logo-icon">account_balance</span>
+      </div>
+      <div class="brand-text-block">
+        <span class="brand-title">FinTrack</span>
+        <span class="brand-tagline">WEALTH MANAGEMENT</span>
+      </div>
+    </div>
+
+    <!-- Add Transaction Primary Button -->
+    <button type="button" class="btn-sidebar-add" (click)="openAddModal()">
+      <span class="material-symbols-outlined plus-icon">add</span>
+      <span>Add Transaction</span>
+    </button>
   </div>
 
- <button class="btn-add-transaction" type="button" (click)="openAddModal()">
-  <span class="material-symbols-outlined plus-icon">add</span>
-  <span>Add Transaction</span>
-</button>
-
-  <nav class="nav-menu">
-    <a class="nav-link" routerLink="/dashboard" routerLinkActive="active">
-      <span class="material-symbols-outlined">grid_view</span>
+  <!-- Middle Navigation Links -->
+  <nav class="sidebar-nav">
+    <a routerLink="/dashboard" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">dashboard</span>
       <span>Dashboard</span>
     </a>
 
-    <a class="nav-link" routerLink="/transactions" routerLinkActive="active">
-      <span class="material-symbols-outlined">receipt_long</span>
+    <a routerLink="/transactions" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">receipt_long</span>
       <span>Transactions</span>
     </a>
 
-   <a class="nav-link" routerLink="/analytics" routerLinkActive="active">
-  <span class="material-symbols-outlined">query_stats</span>
-  <span>Analytics</span>
-</a>
-    <a class="nav-link" routerLink="/budget" routerLinkActive="active">
-  <span class="material-symbols-outlined">account_balance_wallet</span>
-  <span>Budgets</span>
-     </a>
-   <a class="nav-link" routerLink="/categories" routerLinkActive="active">
-  <span class="material-symbols-outlined">category</span>
-  <span>Categories</span>
-</a>
+    <a routerLink="/analytics" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">analytics</span>
+      <span>Analytics</span>
+    </a>
 
-    <a class="nav-link">
-      <span class="material-symbols-outlined">settings</span>
+    <a routerLink="/budgets" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
+      <span>Budgets</span>
+    </a>
+
+    <a routerLink="/categories" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">category</span>
+      <span>Categories</span>
+    </a>
+
+    <a routerLink="/settings" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">settings</span>
       <span>Settings</span>
     </a>
   </nav>
 
-  <div class="sidebar-bottom">
-    <a class="nav-link">
-      <span class="material-symbols-outlined">account_circle</span>
+  <!-- Bottom Section: Profile & Dark Mode Toggle -->
+  <div class="sidebar-footer">
+    <div class="divider-line"></div>
+
+    <a routerLink="/settings" routerLinkActive="active-nav-link" class="nav-item">
+      <span class="material-symbols-outlined nav-icon">account_circle</span>
       <span>Profile</span>
     </a>
-    <a class="nav-link">
-      <span class="material-symbols-outlined">dark_mode</span>
-      <span>Dark Mode</span>
-    </a>
+
+    <button type="button" class="nav-item nav-button-action" (click)="toggleTheme()">
+      <span class="material-symbols-outlined nav-icon">
+        {{ (themeService.isDarkMode$ | async) ? 'light_mode' : 'dark_mode' }}
+      </span>
+      <span>{{ (themeService.isDarkMode$ | async) ? 'Light Mode' : 'Dark Mode' }}</span>
+    </button>
   </div>
+
 </aside>

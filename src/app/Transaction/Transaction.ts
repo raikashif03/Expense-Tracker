@@ -19,29 +19,30 @@ export class Transaction implements OnInit, OnDestroy {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
   };
 
-  searchQuery: string = '';
-  selectedType: string = 'All Types';
-  selectedCategory: string = 'All Categories';
-  selectedPeriod: string = 'This Month';
-  sortOrder: string = 'Newest First';
+  searchQuery = '';
+  selectedType = 'All Types';
+  selectedCategory = 'All Categories';
+  selectedPeriod = 'This Month';
+  sortOrder = 'Newest First';
 
   transactionsList: TransactionItem[] = [];
 
   ngOnInit(): void {
-    // Subscribe to live transactions stream from shared service
-    this.sub = this.txService.transactions$.subscribe((list) => {
+    this.sub = this.txService.transactions$.subscribe(list => {
       this.transactionsList = list;
     });
   }
 
   ngOnDestroy(): void {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    if (this.sub) this.sub.unsubscribe();
   }
 
   openAddModal(): void {
     this.txService.openModal();
+  }
+
+  deleteItem(id: string): void {
+    this.txService.deleteTransaction(id);
   }
 
   getAbs(val: number): number {
@@ -50,6 +51,23 @@ export class Transaction implements OnInit, OnDestroy {
 
   toggleSelectAll(event: Event): void {
     const isChecked = (event.target as HTMLInputElement).checked;
-    this.transactionsList.forEach((t) => (t.selected = isChecked));
+    this.transactionsList.forEach(t => (t.selected = isChecked));
+  }
+
+  get filteredTransactions(): TransactionItem[] {
+    return this.transactionsList.filter(item => {
+      const matchSearch = !this.searchQuery.trim() ||
+        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(this.searchQuery.toLowerCase());
+
+      const matchType = this.selectedType === 'All Types' ||
+        (this.selectedType === 'Income' && item.amount > 0) ||
+        (this.selectedType === 'Expense' && item.amount < 0);
+
+      const matchCat = this.selectedCategory === 'All Categories' ||
+        item.category.toLowerCase() === this.selectedCategory.toLowerCase();
+
+      return matchSearch && matchType && matchCat;
+    });
   }
 }

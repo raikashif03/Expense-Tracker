@@ -1,7 +1,6 @@
 <div class="modal-overlay" *ngIf="isOpen" (click)="close()">
   <div class="modal-dialog" (click)="$event.stopPropagation()">
 
-    
     <!-- Modal Header -->
     <div class="modal-header">
       <h2 class="modal-title">Add Transaction</h2>
@@ -12,7 +11,7 @@
 
     <!-- Modal Body -->
     <div class="modal-body">
-      <!-- Expense/Income Switcher (Empty/Unselected by default) -->
+      <!-- Expense/Income Switcher -->
       <div class="toggle-pill">
         <button 
           type="button" 
@@ -69,9 +68,14 @@
             <select class="form-control select-input" [class.input-error]="isSubmitted && !category" [(ngModel)]="category">
               <option value="" disabled selected>Select category</option>
               <option value="Food & Dining">Food & Dining</option>
-              <option value="Transportation">Transportation</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills & Utilities">Bills & Utilities</option>
               <option value="Entertainment">Entertainment</option>
-              <option value="Salary / Income">Salary / Income</option>
+              <option value="Health & Wellness">Health & Wellness</option>
+              <option value="Education">Education</option>
+              <option value="Travel">Travel</option>
+              <option value="Income">Salary / Income</option>
               <option value="Other">Other</option>
             </select>
             <span class="material-symbols-outlined select-arrow">expand_more</span>
@@ -96,7 +100,7 @@
         </div>
       </div>
 
-      <!-- Payment Method (No default) -->
+      <!-- Payment Method -->
       <div class="form-group">
         <label class="form-label">Payment Method *</label>
         <div class="select-wrapper">

@@ -1,0 +1,203 @@
+<main class="settings-viewport">
+
+  <!-- Top Search Bar -->
+  <header class="top-nav-bar">
+    <div class="search-global-box">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search transactions, budgets..." />
+    </div>
+
+    <div class="nav-right-actions">
+      <button class="icon-circle-btn" type="button" aria-label="Notifications">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+        <span class="material-symbols-outlined">calendar_today</span>
+      </button>
+      <div class="user-avatar-ring">
+        <img [src]="user.avatar" alt="Profile" />
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Title -->
+  <div class="page-title-section">
+    <h1 class="page-heading">Settings</h1>
+    <p class="page-subheading">Manage your profile and application preferences.</p>
+  </div>
+
+  <!-- Changes Saved Feedback Toast -->
+  <div class="save-toast-banner" *ngIf="showToast">
+    <span class="material-symbols-outlined check-icon">check_circle</span>
+    <span>Changes saved successfully!</span>
+  </div>
+
+  <!-- Main Settings Panels -->
+  <div class="settings-content">
+
+    <!-- Profile Card -->
+    <section class="settings-card">
+      <div class="card-title-group">
+        <h2 class="card-main-title">Profile</h2>
+        <p class="card-subtitle">Update your personal information.</p>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="profile-layout">
+        <!-- Avatar Preview -->
+        <div class="avatar-col">
+          <div class="avatar-preview-circle">
+            <img [src]="user.avatar" alt="Profile Avatar" />
+          </div>
+          <button class="btn-change-pic" type="button">Change Picture</button>
+        </div>
+
+        <!-- Name & Email Inputs -->
+        <div class="profile-fields-col">
+          <div class="form-row-duo">
+            <div class="field-item">
+              <label class="field-label">First Name</label>
+              <input type="text" class="text-input" [(ngModel)]="user.firstName" />
+            </div>
+            <div class="field-item">
+              <label class="field-label">Last Name</label>
+              <input type="text" class="text-input" [(ngModel)]="user.lastName" />
+            </div>
+          </div>
+
+          <div class="field-item">
+            <label class="field-label">Email Address</label>
+            <input type="email" class="text-input" [(ngModel)]="user.email" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Two Columns: Preferences & Notifications -->
+    <div class="bottom-split-grid">
+
+      <!-- Preferences Card -->
+      <section class="settings-card">
+        <div class="card-title-group">
+          <h2 class="card-main-title">Preferences</h2>
+          <p class="card-subtitle">Customize how data is displayed.</p>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="pref-form-body">
+          <div class="field-item">
+            <label class="field-label">Currency</label>
+            <div class="custom-select-wrap">
+              <select class="select-input" [(ngModel)]="preferences.currency">
+                <option value="USD ($) - US Dollar">USD ($) - US Dollar</option>
+                <option value="EUR (€) - Euro">EUR (€) - Euro</option>
+                <option value="GBP (£) - British Pound">GBP (£) - British Pound</option>
+              </select>
+              <span class="material-symbols-outlined select-chevron">expand_more</span>
+            </div>
+          </div>
+
+          <div class="form-row-duo">
+            <div class="field-item">
+              <label class="field-label">Week Start</label>
+              <div class="custom-select-wrap">
+                <select class="select-input" [(ngModel)]="preferences.weekStart">
+                  <option value="Monday">Monday</option>
+                  <option value="Sunday">Sunday</option>
+                  <option value="Saturday">Saturday</option>
+                </select>
+                <span class="material-symbols-outlined select-chevron">expand_more</span>
+              </div>
+            </div>
+
+            <div class="field-item">
+              <label class="field-label">Date Format</label>
+              <div class="custom-select-wrap">
+                <select class="select-input" [(ngModel)]="preferences.dateFormat">
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                </select>
+                <span class="material-symbols-outlined select-chevron">expand_more</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-item theme-section">
+            <label class="field-label">Theme Mode</label>
+            <div class="theme-pill-group">
+              <button type="button" class="theme-btn" [class.active]="preferences.theme === 'Light'" (click)="setTheme('Light')">
+                <span class="material-symbols-outlined theme-icon">light_mode</span>
+                <span>Light</span>
+              </button>
+              <button type="button" class="theme-btn" [class.active]="preferences.theme === 'Dark'" (click)="setTheme('Dark')">
+                <span class="material-symbols-outlined theme-icon">dark_mode</span>
+                <span>Dark</span>
+              </button>
+              <button type="button" class="theme-btn" [class.active]="preferences.theme === 'System'" (click)="setTheme('System')">
+                <span class="material-symbols-outlined theme-icon">desktop_windows</span>
+                <span>System</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notifications Card -->
+      <section class="settings-card">
+        <div class="card-title-group">
+          <h2 class="card-main-title">Notifications</h2>
+          <p class="card-subtitle">Manage your email and push alerts.</p>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="notifications-list">
+          <div class="notif-item">
+            <div class="notif-text">
+              <span class="notif-title">Budget Warnings</span>
+              <span class="notif-desc">Alert when spending exceeds 90% of budget.</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="notifications.budgetWarnings" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-text">
+              <span class="notif-title">Weekly Summary</span>
+              <span class="notif-desc">Receive a weekly digest of your finances.</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="notifications.weeklySummary" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-text">
+              <span class="notif-title">New Features</span>
+              <span class="notif-desc">Updates about new platform capabilities.</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" [(ngModel)]="notifications.newFeatures" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-footer-row">
+      <button type="button" class="btn-cancel-settings" (click)="cancelSettings()">Cancel</button>
+      <button type="button" class="btn-save-settings" (click)="saveSettings()">Save Changes</button>
+    </div>
+
+  </div>
+
+</main>

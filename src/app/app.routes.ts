@@ -1,15 +1,24 @@
 import { Routes } from '@angular/router';
 import { Dashboard } from './Dashboard/Dashboard';
-import { Transaction } from './Transaction/Transaction';
 import { Analytics } from './Analytics/Analytics';
-import { Budget } from './Budget/Budget';
-import { Categories } from './Categories/Categories';
+import { Settings } from './Settings/Settings';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard },
-  { path: 'transactions', component: Transaction },
+  {
+    path: 'transactions',
+    loadComponent: () => import('./Transaction/Transaction').then(m => m.Transaction)
+  },
   { path: 'analytics', component: Analytics },
-  { path: 'budget', component: Budget },
-  { path: 'categories', component: Categories }
+  {
+    path: 'budgets',
+    loadComponent: () => import('./Budget/Budget').then(m => m.Budget)
+  },
+  {
+    path: 'categories',
+    loadComponent: () => import('./Categories/Categories').then(m => m.Categories)
+  },
+  { path: 'settings', component: Settings },
+  { path: '**', redirectTo: 'dashboard' }
 ];

@@ -1,18 +1,579 @@
-* {
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+:root {
+  /* Change this single hex code to update primary button colors everywhere */
+  --primary-color: #3b3bf5;
+  --primary-hover: #2e2ed8;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
 }
 
 html,
 body {
-  margin: 0;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-body {
-  background-color: #f8fafc;
-  color: #1e293b;
-  overflow-x: hidden;
+/* Material Symbols Default Config */
+.material-symbols-outlined {
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 24;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Root App Host Layout */
+app-root {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main scrollable content view container */
+router-outlet + * {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Custom Minimal Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Default Placeholder in Light Mode */
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+/* ========================================================
+   GLOBAL DARK MODE SYSTEM
+   ======================================================== */
+body.dark-mode {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Viewports & Base Containers */
+body.dark-mode .sidebar-shell,
+body.dark-mode .dashboard-viewport,
+body.dark-mode .analytics-viewport,
+body.dark-mode .settings-viewport,
+body.dark-mode .transactions-viewport,
+body.dark-mode .categories-viewport,
+body.dark-mode .budgets-viewport {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+  border-color: #1e293b !important;
+}
+
+/* Cards & Elevated Panels */
+body.dark-mode .kpi-card:not(.kpi-purple-theme),
+body.dark-mode .card-panel,
+body.dark-mode .settings-card,
+body.dark-mode .panel-card,
+body.dark-mode .modal-dialog,
+body.dark-mode .table-card,
+body.dark-mode .category-card-item,
+body.dark-mode .budget-card-item {
+  background-color: #111c34 !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Titles and Primary Text */
+body.dark-mode .brand-title,
+body.dark-mode .welcome-heading,
+body.dark-mode .page-heading,
+body.dark-mode .page-title,
+body.dark-mode .panel-title,
+body.dark-mode .card-main-title,
+body.dark-mode .kpi-value,
+body.dark-mode .kpi-val,
+body.dark-mode .tx-title,
+body.dark-mode .tx-name,
+body.dark-mode .category-name,
+body.dark-mode .notif-title,
+body.dark-mode .field-label,
+body.dark-mode .donut-total-val,
+body.dark-mode .donut-val,
+body.dark-mode .budget-name,
+body.dark-mode .modal-title,
+body.dark-mode .category-sum,
+body.dark-mode .cat-label {
+  color: #f8fafc !important;
+}
+
+/* Secondary & Muted Labels */
+body.dark-mode .welcome-subtext,
+body.dark-mode .page-subheading,
+body.dark-mode .page-subtitle,
+body.dark-mode .card-subtitle,
+body.dark-mode .kpi-title,
+body.dark-mode .kpi-tag,
+body.dark-mode .kpi-label,
+body.dark-mode .tx-sub,
+body.dark-mode .tx-category-label,
+body.dark-mode .tx-date-cell,
+body.dark-mode .brand-tagline,
+body.dark-mode .notif-desc,
+body.dark-mode .legend-pct,
+body.dark-mode .budget-numbers,
+body.dark-mode .y-axis-labels,
+body.dark-mode .x-axis-ticks,
+body.dark-mode .chart-x-axis span,
+body.dark-mode .donut-sub,
+body.dark-mode .donut-legend-row,
+body.dark-mode .month-label,
+body.dark-mode .empty-notice,
+body.dark-mode .empty-state-text {
+  color: #94a3b8 !important;
+}
+
+/* Navigation Links */
+body.dark-mode .nav-item {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .nav-item:hover {
+  background-color: #1e293b !important;
+  color: #f87171 !important;
+}
+
+body.dark-mode .nav-item:hover .nav-icon {
+  color: #f87171 !important;
+}
+
+body.dark-mode .active-nav-link {
+  background-color: #450a0a !important;
+  color: #f87171 !important;
+}
+
+body.dark-mode .active-nav-link .nav-icon {
+  color: #f87171 !important;
+}
+
+/* Inputs, Selects, and Textareas */
+body.dark-mode .search-global-box,
+body.dark-mode .text-input,
+body.dark-mode .select-input,
+body.dark-mode .filter-select-wrap,
+body.dark-mode .filter-select-box {
+  background-color: #16223d !important;
+  border-color: #273553 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .search-global-box input {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .select-chevron,
+body.dark-mode .select-arrow {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode select option {
+  background-color: #16223d !important;
+  color: #f8fafc !important;
+}
+
+/* Tables, Dividers & Headers */
+body.dark-mode .top-nav-bar,
+body.dark-mode .card-divider,
+body.dark-mode .divider-line,
+body.dark-mode .recent-table th,
+body.dark-mode .recent-table td,
+body.dark-mode .transactions-data-table th,
+body.dark-mode .transactions-data-table td,
+body.dark-mode .cashflow-bars-area {
+  border-color: #1e293b !important;
+}
+
+body.dark-mode .recent-table tr:hover,
+body.dark-mode .transactions-data-table tr:hover {
+  background-color: #16223d !important;
+}
+
+body.dark-mode .amt-dark,
+body.dark-mode .negative-amt {
+  color: #f8fafc !important;
+}
+
+/* Circular Buttons & Cutouts */
+body.dark-mode .icon-circle-btn {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .icon-circle-btn:hover {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .donut-cutout,
+body.dark-mode .donut-inner-cutout {
+  background-color: #111c34 !important;
+}
+
+body.dark-mode .trend-chart-box {
+  background-color: #0f172a !important;
+}
+
+/* Controls, Toggles, and Settings Theme Pills */
+body.dark-mode .theme-pill-group,
+body.dark-mode .type-toggle-row,
+body.dark-mode .time-pills {
+  background-color: #16223d !important;
+  border-color: #273553 !important;
+}
+
+body.dark-mode .theme-btn.active,
+body.dark-mode .pill-btn.active {
+  background-color: #0b1120 !important;
+  color: var(--primary-color) !important;
+}
+
+body.dark-mode .btn-cancel-settings,
+body.dark-mode .btn-change-pic {
+  background-color: #16223d !important;
+  border-color: #273553 !important;
+  color: #cbd5e1 !important;
+}
+
+body.dark-mode .btn-cancel-settings:hover,
+body.dark-mode .btn-change-pic:hover {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .track-line,
+body.dark-mode .budget-track {
+  background-color: #1e293b !important;
+}
+
+body.dark-mode .switch-slider {
+  background-color: #334155 !important;
+}
+
+body.dark-mode .switch-slider:before {
+  background-color: #f8fafc !important;
+}
+
+body.dark-mode .toggle-switch input:checked + .switch-slider {
+  background-color: var(--primary-color) !important;
+}
+
+/* ========================================================
+   UNIVERSAL PRIMARY BUTTON STYLING (ALL PAGES & MODALS)
+   ======================================================== */
+.btn-primary,
+.btn-add,
+.btn-save,
+.btn-submit,
+.btn-create,
+.btn-add-category,
+.btn-add-budget,
+.btn-sidebar-add,
+.btn-top-add,
+.btn-empty-add,
+.btn-save-settings,
+.budgets-viewport button[class*="add"],
+.categories-viewport button[class*="add"],
+.modal-footer button[class*="submit"],
+.modal-footer button[class*="save"],
+button[class*="btn-add"],
+button[class*="btn-create"] {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: #ffffff !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary:hover,
+.btn-add:hover,
+.btn-save:hover,
+.btn-submit:hover,
+.btn-create:hover,
+.btn-add-category:hover,
+.btn-add-budget:hover,
+.btn-sidebar-add:hover,
+.btn-top-add:hover,
+.btn-empty-add:hover,
+.btn-save-settings:hover,
+.budgets-viewport button[class*="add"]:hover,
+.categories-viewport button[class*="add"]:hover,
+.modal-footer button[class*="submit"]:hover,
+.modal-footer button[class*="save"]:hover,
+button[class*="btn-add"]:hover,
+button[class*="btn-create"]:hover {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+/* ========================================================
+   TABLE HEADERS & VALUE ALIGNMENT
+   ======================================================== */
+
+/* 1. Dashboard: Recent Transactions Amount Alignment */
+.recent-table th:last-child,
+.recent-table th.align-right,
+.recent-table td:last-child,
+.recent-table td.align-right {
+  text-align: right !important;
+  padding-right: 4px !important;
+}
+
+/* 2. Transactions Page: Column Alignment */
+.transactions-data-table {
+  table-layout: fixed !important;
+}
+
+.transactions-data-table th:nth-child(6),
+.transactions-data-table td:nth-child(6),
+.transactions-data-table th.align-right,
+.transactions-data-table td.align-right {
+  text-align: right !important;
+  padding-right: 18px !important;
+}
+
+.transactions-data-table th:nth-child(7),
+.transactions-data-table td:nth-child(7),
+.transactions-data-table th.align-center,
+.transactions-data-table td.align-center,
+.transactions-data-table th:nth-child(8),
+.transactions-data-table td:nth-child(8),
+.transactions-data-table th:last-child,
+.transactions-data-table td:last-child {
+  text-align: center !important;
+}
+
+/* ========================================================
+   ADD TRANSACTION MODAL - EXACT DARK MODE SPECIFICATION
+   ======================================================== */
+
+/* 1. Modal dialog background */
+body.dark-mode .modal-dialog {
+  background-color: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.dark-mode .modal-header {
+  border-bottom: 1px solid #1e293b !important;
+}
+
+body.dark-mode .modal-header .modal-title {
+  color: #ffffff !important;
+}
+
+body.dark-mode .btn-close {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .btn-close:hover {
+  color: #ffffff !important;
+}
+
+/* 2. Outside label names solid white */
+body.dark-mode .form-label,
+body.dark-mode .modal-body label,
+body.dark-mode .modal-body .form-group .form-label {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* 3. All modal input boxes dark mode background and white text */
+body.dark-mode .modal-body .input-prefix-box,
+body.dark-mode .modal-body .input-prefix-box input,
+body.dark-mode .modal-body .form-control,
+body.dark-mode .modal-body select.form-control,
+body.dark-mode .modal-body .select-input,
+body.dark-mode .modal-body .textarea-input,
+body.dark-mode .modal-body input[type="number"],
+body.dark-mode .modal-body input[type="text"],
+body.dark-mode .modal-body input[type="date"] {
+  background-color: #162238 !important;
+  border: 1px solid #22324e !important;
+  color: #ffffff !important;
+  color-scheme: dark !important;
+}
+
+/* Prefix symbol (€) */
+body.dark-mode .modal-body .prefix {
+  color: #ffffff !important;
+}
+
+/* Dropdown arrow icon and select options */
+body.dark-mode .modal-body .select-arrow {
+  color: #ffffff !important;
+}
+
+body.dark-mode .modal-body select.form-control option,
+body.dark-mode .modal-body .select-input option {
+  background-color: #162238 !important;
+  color: #ffffff !important;
+}
+
+/* 4. Placeholder text inside inputs solid white */
+body.dark-mode .modal-body input::placeholder,
+body.dark-mode .modal-body textarea::placeholder,
+body.dark-mode .modal-body .form-control::placeholder,
+body.dark-mode .modal-body .input-prefix-box input::placeholder,
+body.dark-mode .modal-body .textarea-input::placeholder {
+  color: #ffffff !important;
+  opacity: 0.9 !important;
+}
+
+body.dark-mode .modal-body input::-webkit-input-placeholder,
+body.dark-mode .modal-body textarea::-webkit-input-placeholder {
+  color: #ffffff !important;
+  opacity: 0.9 !important;
+}
+
+body.dark-mode .modal-body input::-moz-placeholder,
+body.dark-mode .modal-body textarea::-moz-placeholder {
+  color: #ffffff !important;
+  opacity: 0.9 !important;
+}
+
+/* 5. Expense / Income toggle */
+body.dark-mode .toggle-pill {
+  background-color: #131c2e !important;
+  border: 1px solid #22324e !important;
+}
+
+body.dark-mode .toggle-pill button {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .toggle-pill button.active {
+  background-color: #ffffff !important;
+  color: var(--primary-color) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 6. Footer background dark, buttons retain exact styling */
+body.dark-mode .modal-footer {
+  background-color: #0b1120 !important;
+  border-top: 1px solid #1e293b !important;
+}
+
+body.dark-mode .modal-footer .btn-cancel {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .modal-footer .btn-submit {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .modal-footer .btn-submit:hover {
+  background-color: var(--primary-hover) !important;
+}
+
+/* ========================================================
+   TRANSACTIONS SEARCH BAR - BORDERLESS WHITE FIX
+   ======================================================== */
+
+/* Make search bar white in dark mode */
+body.dark-mode input[type="text"][placeholder*="Search"],
+body.dark-mode input[placeholder*="Search"],
+body.dark-mode div:has(> input[placeholder*="Search"]),
+body.dark-mode .transactions-viewport input[placeholder*="Search"],
+body.dark-mode .transactions-viewport [class*="search"],
+body.dark-mode .search-input-wrap,
+body.dark-mode .filter-search-input {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.dark-mode input[type="text"][placeholder*="Search"]::placeholder,
+body.dark-mode input[placeholder*="Search"]::placeholder,
+body.dark-mode .transactions-viewport input[placeholder*="Search"]::placeholder,
+body.dark-mode .search-input-wrap input::placeholder,
+body.dark-mode .filter-search-input input::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+body.dark-mode div:has(> input[placeholder*="Search"]) .material-symbols-outlined,
+body.dark-mode .transactions-viewport [class*="search"] .material-symbols-outlined,
+body.dark-mode .search-input-wrap .search-icon,
+body.dark-mode .filter-search-input .search-icon {
+  color: #64748b !important;
+}
+
+/* Remove all borders, outlines, and focus rings */
+input[placeholder*="Search"],
+input[type="text"][placeholder*="Search"],
+div:has(> input[placeholder*="Search"]),
+.transactions-viewport [class*="search"],
+.transactions-viewport input[placeholder*="Search"],
+.search-input-wrap,
+.filter-search-input,
+body.dark-mode input[placeholder*="Search"],
+body.dark-mode div:has(> input[placeholder*="Search"]),
+body.dark-mode .transactions-viewport [class*="search"],
+body.dark-mode .search-input-wrap,
+body.dark-mode .filter-search-input {
+  border: none !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+input[placeholder*="Search"]:focus,
+div:has(> input[placeholder*="Search"]):focus-within,
+.transactions-viewport input[placeholder*="Search"]:focus,
+.filter-search-input input:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }

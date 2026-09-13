@@ -1,9 +1,8 @@
 <main class="transactions-viewport">
-
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search transactions..." />
+      <input type="text" placeholder="Search transactions..." [(ngModel)]="searchQuery" />
     </div>
 
     <div class="nav-right-actions">
@@ -13,11 +12,12 @@
       <button class="icon-circle-btn" type="button" aria-label="Calendar">
         <span class="material-symbols-outlined">calendar_today</span>
       </button>
-     <button class="btn-primary-add" type="button" (click)="openAddModal()">
-  <span>Add Transaction</span>
-</button>
+      <button class="btn-top-add" type="button" (click)="openAddModal()">
+       <span class="material-symbols-outlined">add</span>
+       Add Transaction
+      </button>
       <div class="user-avatar-ring">
-        <img [src]="user.avatar" alt="User Profile" />
+        <img [src]="user.avatar" alt="Profile" />
       </div>
     </div>
   </header>
@@ -27,105 +27,134 @@
     <p class="page-subheading">Manage and review all your income and expenses.</p>
   </div>
 
-  <section class="filters-card">
-    <div class="filter-search-input">
-      <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
+  <section class="empty-state-wrapper" *ngIf="transactionsList.length === 0">
+    <div class="empty-icon-circle">
+      <span class="material-symbols-outlined receipt-icon">receipt_long</span>
     </div>
-
-    <div class="filter-select-box">
-      <span>{{ selectedType }}</span>
-      <span class="material-symbols-outlined">expand_more</span>
-    </div>
-
-    <div class="filter-select-box">
-      <span>{{ selectedCategory }}</span>
-      <span class="material-symbols-outlined">expand_more</span>
-    </div>
-
-    <div class="filter-select-box">
-      <span>{{ selectedPeriod }}</span>
-      <span class="material-symbols-outlined icon-end">calendar_month</span>
-    </div>
-
-    <div class="filter-select-box">
-      <span>{{ sortOrder }}</span>
-      <span class="material-symbols-outlined icon-end">sort</span>
-    </div>
+    <h2 class="empty-title">No transactions yet</h2>
+    <p class="empty-subtitle">
+      Add your first transaction to start tracking your finances, setting budgets, and gaining insights.
+    </p>
+    <button class="btn-empty-add" type="button" (click)="openAddModal()">
+      <span class="material-symbols-outlined plus-icon">add</span>
+      <span>Add Transaction</span>
+    </button>
   </section>
 
-  <section class="table-card">
-    <div class="table-frame">
-      <table class="transactions-data-table">
-        <thead>
-          <tr>
-            <th class="col-checkbox">
-              <input type="checkbox" (change)="toggleSelectAll($event)" />
-            </th>
-            <th class="col-title">TRANSACTION</th>
-            <th>CATEGORY</th>
-            <th>DATE</th>
-            <th>METHOD</th>
-            <th class="align-right">AMOUNT</th>
-            <th class="align-center">STATUS</th>
-            <th class="align-center">ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of transactionsList">
-            <td class="col-checkbox">
-              <input type="checkbox" [checked]="item.selected" (change)="item.selected = !item.selected" />
-            </td>
-            <td>
-              <div class="item-title-meta">
-                <div class="type-icon-box" [style.background]="item.iconBg" [style.color]="item.iconColor">
-                  <span class="material-symbols-outlined">{{ item.icon }}</span>
-                </div>
-                <span class="tx-name">{{ item.name }}</span>
-              </div>
-            </td>
-            <td class="cell-category">{{ item.category }}</td>
-            <td class="cell-muted">{{ item.date }}</td>
-            <td class="cell-muted">{{ item.method }}</td>
-            <td class="align-right">
-              <span class="amount-val" [ngClass]="item.amount > 0 ? 'positive-amt' : 'negative-amt'">
-                {{ item.amount > 0 ? '+' : '-' }}€{{ getAbs(item.amount) | number:'1.2-2' }}
-              </span>
-            </td>
-            <td class="align-center">
-              <span class="badge-status" [ngClass]="item.status.toLowerCase()">
-                {{ item.status }}
-              </span>
-            </td>
-            <td class="align-center">
-              <button class="row-menu-btn" type="button">
-                <span class="material-symbols-outlined">more_horiz</span>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <footer class="pagination-footer">
-      <span class="pagination-summary">
-        Showing <strong>1</strong> to <strong>{{ transactionsList.length }}</strong> of <strong>128</strong> entries
-      </span>
-
-      <div class="pagination-controls">
-        <button class="pager-btn" type="button" disabled>
-          <span class="material-symbols-outlined">chevron_left</span>
-        </button>
-        <button class="pager-btn active" type="button">1</button>
-        <button class="pager-btn" type="button">2</button>
-        <button class="pager-btn" type="button">3</button>
-        <span class="pager-ellipsis">...</span>
-        <button class="pager-btn" type="button">12</button>
-        <button class="pager-btn" type="button">
-          <span class="material-symbols-outlined">chevron_right</span>
-        </button>
+  <ng-container *ngIf="transactionsList.length > 0">
+    <section class="filters-card">
+      <div class="filter-search-input">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
       </div>
-    </footer>
-  </section>
 
+      <div class="filter-select-box">
+        <select [(ngModel)]="selectedType">
+          <option value="All Types">All Types</option>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <span class="material-symbols-outlined select-arrow">expand_more</span>
+      </div>
+
+      <div class="filter-select-box">
+        <select [(ngModel)]="selectedCategory">
+          <option value="All Categories">All Categories</option>
+          <option value="Food & Dining">Food & Dining</option>
+          <option value="Income">Income</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Transportation">Transportation</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Bills & Utilities">Bills & Utilities</option>
+        </select>
+        <span class="material-symbols-outlined select-arrow">expand_more</span>
+      </div>
+
+      <div class="filter-select-box">
+        <select [(ngModel)]="selectedPeriod">
+          <option value="This Month">This Month</option>
+          <option value="All Time">All Time</option>
+        </select>
+        <span class="material-symbols-outlined select-arrow">calendar_month</span>
+      </div>
+
+      <div class="filter-select-box">
+        <select [(ngModel)]="sortOrder">
+          <option value="Newest First">Newest First</option>
+          <option value="Oldest First">Oldest First</option>
+        </select>
+        <span class="material-symbols-outlined select-arrow">sort</span>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-frame">
+        <table class="transactions-data-table">
+          <thead>
+            <tr>
+              <th class="col-checkbox">
+                <input type="checkbox" (change)="toggleSelectAll($event)" />
+              </th>
+              <th>TRANSACTION</th>
+              <th>CATEGORY</th>
+              <th>DATE</th>
+              <th>METHOD</th>
+              <th class="align-right">AMOUNT</th>
+              <th class="align-center">STATUS</th>
+              <th class="align-center">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredTransactions">
+              <td class="col-checkbox">
+                <input type="checkbox" [checked]="item.selected" (change)="item.selected = !item.selected" />
+              </td>
+              <td>
+                <div class="item-title-meta">
+                  <div class="type-icon-box" [style.background]="item.iconBg" [style.color]="item.iconColor">
+                    <span class="material-symbols-outlined">{{ item.icon }}</span>
+                  </div>
+                  <span class="tx-name">{{ item.name }}</span>
+                </div>
+              </td>
+              <td class="cell-category">{{ item.category }}</td>
+              <td class="cell-muted">{{ item.date }}</td>
+              <td class="cell-muted">{{ item.method }}</td>
+              <td class="align-right">
+                <span class="amount-val" [ngClass]="item.amount > 0 ? 'positive-amt' : 'negative-amt'">
+                  {{ item.amount > 0 ? '+' : '-' }}€{{ getAbs(item.amount) | number:'1.2-2' }}
+                </span>
+              </td>
+              <td class="align-center">
+                <span class="badge-status" [ngClass]="item.status.toLowerCase()">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="align-center">
+                <button class="row-delete-btn" type="button" (click)="deleteItem(item.id)" title="Delete transaction">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="pagination-footer">
+        <span class="pagination-summary">
+          Showing <strong>1</strong> to <strong>{{ filteredTransactions.length }}</strong> of <strong>{{ transactionsList.length }}</strong> entries
+        </span>
+
+        <div class="pagination-controls">
+          <button class="pager-btn" type="button" disabled>
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          <button class="pager-btn active" type="button">1</button>
+          <button class="pager-btn" type="button">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </footer>
+    </section>
+  </ng-container>
 </main>
