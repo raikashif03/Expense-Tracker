@@ -244,3 +244,145 @@
 .btn-empty-add:hover {
   background-color: var(--primary-hover, #2e2ed8);
 }
+/* ========================================================
+   TRANSACTIONS REFINED DARK THEME (MATCHING SIDEBAR TONES)
+   ======================================================== */
+
+/* 1. Filter Toolbar Container - Sleek Dark Navy Background */
+body.dark-mode .filters-card {
+  background-color: #111c34 !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 14px;
+}
+
+/* Integrated Search Input in Toolbar */
+body.dark-mode .filter-search-input,
+body.dark-mode .filter-search-input input {
+  background-color: #16223d !important;
+  border: 1px solid #273553 !important;
+  color: #f8fafc !important;
+  border-radius: 10px;
+}
+
+body.dark-mode .filter-search-input input::placeholder {
+  color: #64748b !important;
+}
+
+body.dark-mode .filter-search-input .search-icon {
+  color: #94a3b8 !important;
+}
+
+/* Filter Dropdown Pills */
+body.dark-mode .filter-select-box {
+  background-color: #16223d !important;
+  border: 1px solid #273553 !important;
+  border-radius: 10px;
+}
+
+body.dark-mode .filter-select-box select {
+  background-color: transparent !important;
+  color: #cbd5e1 !important;
+  font-weight: 500;
+}
+
+body.dark-mode .filter-select-box select option {
+  background-color: #16223d !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .filter-select-box .select-arrow,
+body.dark-mode .filter-select-box .material-symbols-outlined {
+  color: #94a3b8 !important;
+}
+
+/* 2. Table Headings & Columns: Sidebar Muted Slate Tone */
+body.dark-mode .transactions-data-table th {
+  color: #64748b !important;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+/* Primary Transaction Name */
+body.dark-mode .transactions-data-table .tx-name {
+  color: #f8fafc !important;
+  font-weight: 600;
+}
+
+/* Category, Date, Method: Matches Sidebar Inactive Color */
+body.dark-mode .transactions-data-table .cell-category,
+body.dark-mode .transactions-data-table .cell-muted,
+body.dark-mode .transactions-data-table .tx-date-cell,
+body.dark-mode .transactions-data-table .method-cell,
+body.dark-mode .transactions-data-table td {
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+/* Amounts */
+body.dark-mode .transactions-data-table .positive-amt {
+  color: #34d399 !important;
+  font-weight: 700;
+}
+
+body.dark-mode .transactions-data-table .negative-amt {
+  color: #f87171 !important;
+  font-weight: 700;
+}
+
+/* Status Pill */
+body.dark-mode .badge-status.completed {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  color: #818cf8 !important;
+}
+
+/* Row Action Delete Button */
+body.dark-mode .row-delete-btn {
+  background: transparent !important;
+}
+
+body.dark-mode .row-delete-btn .material-symbols-outlined {
+  color: #64748b !important;
+  transition: color 0.15s ease;
+}
+
+body.dark-mode .row-delete-btn:hover .material-symbols-outlined {
+  color: #ef4444 !important;
+}
+
+/* 3. Bottom Pagination Section */
+body.dark-mode .pagination-footer {
+  border-top: 1px solid #1e293b !important;
+}
+
+body.dark-mode .pagination-summary {
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .pagination-summary strong {
+  color: #f8fafc !important;
+}
+
+body.dark-mode .pagination-controls .pager-btn {
+  background-color: #16223d !important;
+  border: 1px solid #273553 !important;
+  color: #94a3b8 !important;
+  border-radius: 8px;
+}
+
+body.dark-mode .pagination-controls .pager-btn:hover:not(:disabled) {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .pagination-controls .pager-btn.active {
+  background-color: var(--primary-color, #3b3bf5) !important;
+  border-color: var(--primary-color, #3b3bf5) !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .pagination-controls .pager-btn:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed;
+}

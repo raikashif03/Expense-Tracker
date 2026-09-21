@@ -13,9 +13,10 @@ import { TransactionService, CategoryItem } from '../services/transaction.servic
 })
 export class Categories implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
-  private sub!: Subscription;
+  private sub = new Subscription();
 
   categories: CategoryItem[] = [];
+  currency = '€';
 
   isDeleteModalOpen = false;
   categoryToDelete: CategoryItem | null = null;
@@ -24,25 +25,26 @@ export class Categories implements OnInit, OnDestroy {
   isEditMode = false;
   currentEditId: string | null = null;
   formCategoryName = '';
-  formCategoryAmount: number | null = null;
   formCategoryIcon = 'category';
   formCategoryType: 'spent' | 'earned' = 'spent';
 
   ngOnInit(): void {
-    this.sub = this.txService.categories$.subscribe(cats => {
-      this.categories = cats;
-    });
+    this.sub.add(
+      this.txService.categories$.subscribe(cats => (this.categories = cats))
+    );
+    this.sub.add(
+      this.txService.currency$.subscribe(curr => (this.currency = curr))
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   openCreateCategoryModal(): void {
     this.isEditMode = false;
     this.currentEditId = null;
     this.formCategoryName = '';
-    this.formCategoryAmount = null;
     this.formCategoryIcon = 'category';
     this.formCategoryType = 'spent';
     this.isAddEditModalOpen = true;
@@ -52,7 +54,6 @@ export class Categories implements OnInit, OnDestroy {
     this.isEditMode = true;
     this.currentEditId = cat.id;
     this.formCategoryName = cat.name;
-    this.formCategoryAmount = cat.spentAmount;
     this.formCategoryIcon = cat.icon;
     this.formCategoryType = cat.type;
     this.isAddEditModalOpen = true;
@@ -65,16 +66,14 @@ export class Categories implements OnInit, OnDestroy {
   saveCategory(): void {
     if (!this.formCategoryName.trim()) return;
 
-    const assignedAmount = this.formCategoryAmount ? Math.abs(this.formCategoryAmount) : 0;
     const isIncome = this.formCategoryType === 'earned';
+    const existing = this.categories.find(c => c.id === this.currentEditId);
 
     const itemToSave: CategoryItem = {
       id: this.currentEditId || `cat-${Date.now()}`,
       name: this.formCategoryName.trim(),
-      transactionsCount: this.isEditMode
-        ? (this.categories.find(c => c.id === this.currentEditId)?.transactionsCount || 0)
-        : 0,
-      spentAmount: assignedAmount,
+      transactionsCount: existing ? existing.transactionsCount : 0,
+      spentAmount: existing ? existing.spentAmount : 0,
       type: this.formCategoryType,
       icon: this.formCategoryIcon,
       iconBg: isIncome ? '#dcfce7' : '#ede9fe',

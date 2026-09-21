@@ -9,7 +9,7 @@ import { ThemeService } from '../services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './Sidebar.html',
-  styleUrl: './Sidebar.css'
+  styleUrl: './sidebar.css'
 })
 export class Sidebar {
   private txService = inject(TransactionService);

@@ -20,7 +20,7 @@ export interface MonthlyCashFlow {
 })
 export class Analytics implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
-  private sub!: Subscription;
+  private sub = new Subscription();
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
@@ -34,26 +34,30 @@ export class Analytics implements OnInit, OnDestroy {
   categoryBreakdown: { name: string; amount: number; percentage: number; color: string }[] = [];
   donutGradient = '#e2e8f0';
   transactions: TransactionItem[] = [];
+  currency = '€';
 
-  // Spending Trend properties
   chartPath = '';
   chartAreaPath = '';
   trendWeeks: string[] = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'];
   yTrendLabels: number[] = [3500, 3000, 2500, 2000, 1500, 1000, 500, 0];
 
-  // Cash Flow properties
   cashFlowMonths: MonthlyCashFlow[] = [];
   yCashFlowLabels: number[] = [10000, 8000, 6000, 4000, 2000, 0];
 
   ngOnInit(): void {
-    this.sub = this.txService.transactions$.subscribe(list => {
-      this.transactions = list;
-      this.calculateAnalytics();
-    });
+    this.sub.add(
+      this.txService.transactions$.subscribe(list => {
+        this.transactions = list;
+        this.calculateAnalytics();
+      })
+    );
+    this.sub.add(
+      this.txService.currency$.subscribe(c => (this.currency = c))
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   openAddModal(): void {
@@ -96,13 +100,10 @@ export class Analytics implements OnInit, OnDestroy {
 
   private buildTrendLine(): void {
     const actualExpense = this.totalSpent;
-
-    // Use actual spending to determine a realistic maximum or standard demo baseline
     const dynamicMax = actualExpense > 0 
       ? Math.max(Math.ceil((actualExpense * 1.4) / 100) * 100, 200) 
       : 3500;
 
-    // Set 8 step labels down to 0
     const step = Math.round(dynamicMax / 7);
     this.yTrendLabels = [
       dynamicMax,
@@ -115,7 +116,6 @@ export class Analytics implements OnInit, OnDestroy {
       0
     ];
 
-    // Create wave multipliers to simulate weekly expenditure flow
     const waveMultipliers = [0.35, 0.55, 0.45, 0.62, 0.52, 0.82, 0.72, 0.92, 0.76, 0.58, 0.52, 0.74];
     const dataPoints = waveMultipliers.map(m => dynamicMax * m);
 
@@ -132,7 +132,6 @@ export class Analytics implements OnInit, OnDestroy {
       return { x, y };
     });
 
-    // Build smooth cubic Bézier curves
     let d = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) {
       const prev = points[i - 1];
@@ -146,43 +145,48 @@ export class Analytics implements OnInit, OnDestroy {
   }
 
   private buildCashFlow(): void {
-    const inc = this.totalIncome > 0 ? this.totalIncome : 3200;
-    const exp = this.totalSpent > 0 ? this.totalSpent : 1845;
+    const monthBuckets = new Map<string, { income: number; expense: number }>();
 
-    const maxVal = Math.max(inc, exp, 8000);
-    const chartCeiling = Math.ceil(maxVal / 2000) * 2000;
-    
+    this.transactions.forEach(t => {
+      const d = new Date(t.date);
+      const mName = isNaN(d.getTime()) 
+        ? 'Dec' 
+        : d.toLocaleDateString('en-US', { month: 'short' });
+
+      if (!monthBuckets.has(mName)) {
+        monthBuckets.set(mName, { income: 0, expense: 0 });
+      }
+
+      const item = monthBuckets.get(mName)!;
+      if (t.amount > 0) item.income += t.amount;
+      else item.expense += Math.abs(t.amount);
+    });
+
+    if (monthBuckets.size === 0) {
+      monthBuckets.set('Dec', { income: this.totalIncome, expense: this.totalSpent });
+    }
+
+    let highestVal = 0;
+    monthBuckets.forEach(val => {
+      highestVal = Math.max(highestVal, val.income, val.expense);
+    });
+
+    const ceiling = Math.max(Math.ceil((highestVal * 1.2) / 1000) * 1000, 1000);
     this.yCashFlowLabels = [
-      chartCeiling,
-      Math.round(chartCeiling * 0.8),
-      Math.round(chartCeiling * 0.6),
-      Math.round(chartCeiling * 0.4),
-      Math.round(chartCeiling * 0.2),
+      ceiling,
+      Math.round(ceiling * 0.8),
+      Math.round(ceiling * 0.6),
+      Math.round(ceiling * 0.4),
+      Math.round(ceiling * 0.2),
       0
     ];
 
-    this.cashFlowMonths = [
-      {
-        month: 'Sep',
-        income: inc,
-        expense: exp,
-        incomeHeightPct: Math.min(100, (inc / chartCeiling) * 100),
-        expenseHeightPct: Math.min(100, (exp / chartCeiling) * 100)
-      },
-      {
-        month: 'Oct',
-        income: Math.round(inc * 1.05),
-        expense: Math.round(exp * 0.92),
-        incomeHeightPct: Math.min(100, ((inc * 1.05) / chartCeiling) * 100),
-        expenseHeightPct: Math.min(100, ((exp * 0.92) / chartCeiling) * 100)
-      },
-      {
-        month: 'Nov',
-        income: Math.round(inc * 1.12),
-        expense: Math.round(exp * 1.06),
-        incomeHeightPct: Math.min(100, ((inc * 1.12) / chartCeiling) * 100),
-        expenseHeightPct: Math.min(100, ((exp * 1.06) / chartCeiling) * 100)
-      }
-    ];
+    this.cashFlowMonths = Array.from(monthBuckets.entries()).map(([month, stats]) => ({
+      month,
+      income: stats.income,
+      expense: stats.expense,
+      incomeHeightPct: Math.min(100, Math.round((stats.income / ceiling) * 100)),
+      expenseHeightPct: Math.min(100, Math.round((stats.expense / ceiling) * 100))
+    }));
   }
 }

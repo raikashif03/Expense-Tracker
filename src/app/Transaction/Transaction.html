@@ -13,8 +13,8 @@
         <span class="material-symbols-outlined">calendar_today</span>
       </button>
       <button class="btn-top-add" type="button" (click)="openAddModal()">
-       <span class="material-symbols-outlined">add</span>
-       Add Transaction
+        <span class="material-symbols-outlined">add</span>
+        Add Transaction
       </button>
       <div class="user-avatar-ring">
         <img [src]="user.avatar" alt="Profile" />
@@ -60,12 +60,7 @@
       <div class="filter-select-box">
         <select [(ngModel)]="selectedCategory">
           <option value="All Categories">All Categories</option>
-          <option value="Food & Dining">Food & Dining</option>
-          <option value="Income">Income</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Transportation">Transportation</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Bills & Utilities">Bills & Utilities</option>
+          <option *ngFor="let cat of categoriesList" [value]="cat">{{ cat }}</option>
         </select>
         <span class="material-symbols-outlined select-arrow">expand_more</span>
       </div>
@@ -105,7 +100,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of filteredTransactions">
+            <tr *ngFor="let item of paginatedTransactions">
               <td class="col-checkbox">
                 <input type="checkbox" [checked]="item.selected" (change)="item.selected = !item.selected" />
               </td>
@@ -118,11 +113,11 @@
                 </div>
               </td>
               <td class="cell-category">{{ item.category }}</td>
-              <td class="cell-muted">{{ item.date }}</td>
+              <td class="cell-muted">{{ item.date | date:dateFormat }}</td>
               <td class="cell-muted">{{ item.method }}</td>
               <td class="align-right">
                 <span class="amount-val" [ngClass]="item.amount > 0 ? 'positive-amt' : 'negative-amt'">
-                  {{ item.amount > 0 ? '+' : '-' }}€{{ getAbs(item.amount) | number:'1.2-2' }}
+                  {{ item.amount > 0 ? '+' : '-' }}{{ currency }}{{ getAbs(item.amount) | number:'1.2-2' }}
                 </span>
               </td>
               <td class="align-center">
@@ -142,15 +137,22 @@
 
       <footer class="pagination-footer">
         <span class="pagination-summary">
-          Showing <strong>1</strong> to <strong>{{ filteredTransactions.length }}</strong> of <strong>{{ transactionsList.length }}</strong> entries
+          Showing <strong>{{ startEntryIndex }}</strong> to <strong>{{ endEntryIndex }}</strong> of <strong>{{ filteredTransactions.length }}</strong> entries
         </span>
 
         <div class="pagination-controls">
-          <button class="pager-btn" type="button" disabled>
+          <button class="pager-btn" type="button" (click)="prevPage()" [disabled]="currentPage === 1">
             <span class="material-symbols-outlined">chevron_left</span>
           </button>
-          <button class="pager-btn active" type="button">1</button>
-          <button class="pager-btn" type="button">
+          <button 
+            *ngFor="let page of pagesArray" 
+            class="pager-btn" 
+            [class.active]="currentPage === page" 
+            (click)="goToPage(page)" 
+            type="button">
+            {{ page }}
+          </button>
+          <button class="pager-btn" type="button" (click)="nextPage()" [disabled]="currentPage === totalPages">
             <span class="material-symbols-outlined">chevron_right</span>
           </button>
         </div>

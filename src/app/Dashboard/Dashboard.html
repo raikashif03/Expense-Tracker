@@ -29,10 +29,10 @@
           <span class="material-symbols-outlined">account_balance</span>
         </div>
       </div>
-      <div class="kpi-value">€{{ totalBalance | number:'1.2-2' }}</div>
-      <div class="kpi-trend text-green">
-        <span class="material-symbols-outlined trend-arrow">arrow_upward</span>
-        <span>+€{{ savingsAmount | number:'1.2-2' }} this month</span>
+      <div class="kpi-value">{{ totalBalance < 0 ? '-' : '' }}{{ currency }}{{ getAbs(totalBalance) | number:'1.2-2' }}</div>
+      <div class="kpi-trend" [ngClass]="totalBalance >= 0 ? 'text-green' : 'text-danger'">
+        <span class="material-symbols-outlined trend-arrow">{{ totalBalance >= 0 ? 'arrow_upward' : 'arrow_downward' }}</span>
+        <span>{{ totalBalance >= 0 ? '+' : '-' }}{{ currency }}{{ getAbs(savingsAmount) | number:'1.2-2' }} this month</span>
       </div>
     </div>
 
@@ -43,7 +43,7 @@
           <span class="material-symbols-outlined">payments</span>
         </div>
       </div>
-      <div class="kpi-value">€{{ monthlyIncome | number:'1.2-2' }}</div>
+      <div class="kpi-value">{{ currency }}{{ monthlyIncome | number:'1.2-2' }}</div>
       <div class="kpi-trend text-green">
         <span class="material-symbols-outlined trend-arrow">trending_up</span>
         <span>Total Received</span>
@@ -57,7 +57,7 @@
           <span class="material-symbols-outlined">shopping_cart</span>
         </div>
       </div>
-      <div class="kpi-value">€{{ monthlyExpenses | number:'1.2-2' }}</div>
+      <div class="kpi-value">{{ currency }}{{ monthlyExpenses | number:'1.2-2' }}</div>
       <div class="kpi-trend text-teal">
         <span class="material-symbols-outlined trend-arrow">trending_down</span>
         <span>Total Outflow</span>
@@ -71,7 +71,7 @@
           <span class="material-symbols-outlined">savings</span>
         </div>
       </div>
-      <div class="kpi-value">€{{ savingsAmount | number:'1.2-2' }}</div>
+      <div class="kpi-value">{{ currency }}{{ savingsAmount | number:'1.2-2' }}</div>
       <div class="kpi-trend text-muted">
         <span>{{ savingsRate }}% savings rate</span>
       </div>
@@ -144,10 +144,10 @@
                     </div>
                   </div>
                 </td>
-                <td class="tx-date-cell">{{ item.date }}</td>
+                <td class="tx-date-cell">{{ item.date | date:dateFormat }}</td>
                 <td class="align-right">
                   <span class="tx-amt" [ngClass]="item.amount > 0 ? 'amt-green' : 'amt-dark'">
-                    {{ item.amount > 0 ? '+' : '-' }}€{{ getAbs(item.amount) | number:'1.2-2' }}
+                    {{ item.amount > 0 ? '+' : '-' }}{{ currency }}{{ getAbs(item.amount) | number:'1.2-2' }}
                   </span>
                 </td>
               </tr>
@@ -173,7 +173,7 @@
         <div class="donut-center-wrap">
           <div class="donut-wheel" [style.background]="donutGradient">
             <div class="donut-cutout">
-              <span class="donut-total-val">€{{ monthlyExpenses | number:'1.0-0' }}</span>
+              <span class="donut-total-val">{{ currency }}{{ monthlyExpenses | number:'1.0-0' }}</span>
               <span class="donut-sub">Total</span>
             </div>
           </div>
@@ -202,8 +202,10 @@
         <div class="budget-items-list">
           <div class="budget-row" *ngFor="let b of budgetList">
             <div class="budget-label-row">
-              <span class="budget-name">{{ b.name }}</span>
-              <span class="budget-numbers">€{{ b.spent | number:'1.0-0' }} / €{{ b.allocated | number:'1.0-0' }}</span>
+              <span class="budget-name" [style.color]="b.isExceeded ? '#ef4444' : 'inherit'">{{ b.name }}</span>
+              <span class="budget-numbers" [style.color]="b.isExceeded ? '#ef4444' : 'inherit'">
+                {{ currency }}{{ b.spent | number:'1.0-0' }} / {{ currency }}{{ b.allocated | number:'1.0-0' }}
+              </span>
             </div>
             <div class="budget-track">
               <div class="budget-fill" [style.width.%]="b.percentage" [style.background-color]="b.color"></div>

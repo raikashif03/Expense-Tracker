@@ -17,6 +17,7 @@ export interface DashboardBudgetItem {
   allocated: number;
   percentage: number;
   color: string;
+  isExceeded: boolean;
 }
 
 @Component({
@@ -28,14 +29,17 @@ export interface DashboardBudgetItem {
 })
 export class Dashboard implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
-  private sub!: Subscription;
+  private sub = new Subscription();
 
-  userName = 'Alex';
-  currentMonth = 'September';
+  userName = 'Jane';
+  currentMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
   };
+
+  currency = '€';
+  dateFormat = 'MMM dd, yyyy';
 
   totalBalance = 0;
   monthlyIncome = 0;
@@ -53,9 +57,26 @@ export class Dashboard implements OnInit, OnDestroy {
   private currentBudgets: BudgetItem[] = [];
 
   ngOnInit(): void {
-    this.sub = this.txService.budgets$.subscribe(b => {
-      this.currentBudgets = b;
-    });
+    this.loadUserProfile();
+
+    this.sub.add(
+      this.txService.currency$.subscribe(curr => {
+        this.currency = curr;
+      })
+    );
+
+    this.sub.add(
+      this.txService.dateFormat$.subscribe(fmt => {
+        this.dateFormat = fmt;
+      })
+    );
+
+    this.sub.add(
+      this.txService.budgets$.subscribe(b => {
+        this.currentBudgets = b;
+        this.computeBudgets();
+      })
+    );
 
     this.sub.add(
       this.txService.transactions$.subscribe(list => {
@@ -66,7 +87,7 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   openAddModal(): void {
@@ -75,6 +96,21 @@ export class Dashboard implements OnInit, OnDestroy {
 
   getAbs(val: number): number {
     return Math.abs(val);
+  }
+
+  private loadUserProfile(): void {
+    try {
+      const saved = localStorage.getItem('fintrack_user_settings_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.user?.firstName) {
+          this.userName = parsed.user.firstName;
+        }
+        if (parsed.user?.avatar) {
+          this.user.avatar = parsed.user.avatar;
+        }
+      }
+    } catch {}
   }
 
   private computeMetrics(): void {
@@ -124,15 +160,14 @@ export class Dashboard implements OnInit, OnDestroy {
   private computeBudgets(): void {
     const allBreakdown = this.txService.getCategoryBreakdown();
 
-    // Map whatever categories actually have expenses added to them
     this.budgetList = allBreakdown.map(cat => {
-      // Find allocation from registered budgets if exists, else default to 300
       const existingBudget = this.currentBudgets.find(b =>
         b.category.toLowerCase().trim() === cat.name.toLowerCase().trim() ||
         this.txService.normalizeCategory(b.category) === this.txService.normalizeCategory(cat.name)
       );
 
       const allocated = existingBudget ? existingBudget.allocated : 300;
+      const isExceeded = cat.amount > allocated;
       const percentage = Math.min(100, Math.round((cat.amount / allocated) * 100));
 
       return {
@@ -140,7 +175,8 @@ export class Dashboard implements OnInit, OnDestroy {
         spent: cat.amount,
         allocated: allocated,
         percentage: percentage,
-        color: cat.color
+        color: isExceeded ? '#ef4444' : cat.color,
+        isExceeded: isExceeded
       };
     });
   }

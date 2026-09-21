@@ -1,4 +1,5 @@
 <main class="budgets-viewport">
+  <!-- Top Navigation Bar -->
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
@@ -9,23 +10,25 @@
       <button class="icon-circle-btn" type="button" aria-label="Notifications">
         <span class="material-symbols-outlined">notifications</span>
       </button>
-      <button class="btn-primary-add" type="button" (click)="openAddModal()">
-        <span class="material-symbols-outlined plus-icon">add</span>
-        <span>Add Transaction</span>
-      </button>
       <div class="user-avatar-ring">
         <img [src]="user.avatar" alt="Avatar" />
       </div>
     </div>
   </header>
 
+  <!-- Page Title Section with Add Budget Button -->
   <div class="page-title-section">
     <div>
       <h1 class="page-heading">Budgets</h1>
       <p class="page-subheading">Set spending limits and stay on track with live updates.</p>
     </div>
+    <button class="btn-primary-add-budget" type="button" (click)="openCreateBudgetModal()">
+      <span class="material-symbols-outlined">add</span>
+      <span>Add Budget</span>
+    </button>
   </div>
 
+  <!-- Budgets Grid -->
   <section class="budgets-grid">
     <div class="budget-card" *ngFor="let item of budgetsList" [class.card-danger-border]="item.isExceeded">
       <div class="budget-card-header">
@@ -38,13 +41,21 @@
             <span class="cat-period">{{ item.period }}</span>
           </div>
         </div>
-        <button class="card-menu-btn" type="button"><span class="material-symbols-outlined">more_vert</span></button>
+        <!-- Edit & Delete Action Buttons (Styled like Categories) -->
+        <div class="actions-pill">
+          <button class="action-btn edit-btn" type="button" (click)="openEditBudgetModal(item)" title="Edit Budget">
+            <span class="material-symbols-outlined icon-small">edit</span>
+          </button>
+          <button class="action-btn delete-btn" type="button" (click)="openDeleteModal(item)" title="Delete Budget">
+            <span class="material-symbols-outlined icon-small">delete</span>
+          </button>
+        </div>
       </div>
 
       <div class="spend-summary">
         <div class="amount-main">
-          <span class="spent" [class.spent-danger]="item.isExceeded">€{{ item.spent | number:'1.0-0' }}</span>
-          <span class="total">/ €{{ item.allocated | number:'1.0-0' }}</span>
+          <span class="spent" [class.spent-danger]="item.isExceeded">{{ currency }}{{ item.spent | number:'1.0-0' }}</span>
+          <span class="total">/ {{ currency }}{{ item.allocated | number:'1.0-0' }}</span>
         </div>
         <span class="pct-badge" [ngClass]="item.isExceeded ? 'pct-red' : (item.isClose ? 'pct-yellow' : 'pct-blue')">
           {{ item.percentUsed }}% used
@@ -59,8 +70,8 @@
 
       <div class="remaining-row">
         <span class="rem-label">Remaining</span>
-        <span class="rem-val" [class.text-danger]="item.isExceeded">
-          {{ item.remaining < 0 ? '-' : '' }}€{{ (item.remaining < 0 ? -item.remaining : item.remaining) | number:'1.0-0' }}
+        <span class="rem-val" [class.text-danger]="item.remaining < 0">
+          {{ item.remaining < 0 ? '-' : '' }}{{ currency }}{{ (item.remaining < 0 ? -item.remaining : item.remaining) | number:'1.0-0' }}
         </span>
       </div>
 
@@ -71,8 +82,109 @@
 
       <div class="alert-banner alert-danger" *ngIf="item.isExceeded">
         <span class="material-symbols-outlined alert-icon">error</span>
-        <span>Budget exceeded by €{{ -item.remaining | number:'1.0-0' }}.</span>
+        <span>Budget exceeded by {{ currency }}{{ -item.remaining | number:'1.0-0' }}.</span>
       </div>
     </div>
   </section>
 </main>
+
+<!-- Add / Edit Budget Modal Dialog (Same style as Category Modal) -->
+<div class="modal-backdrop" *ngIf="isAddEditModalOpen" (click)="closeAddEditModal()">
+  <div class="add-edit-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="modal-header-row">
+      <h2 class="dialog-title">{{ isEditMode ? 'Edit Budget' : 'Add Budget' }}</h2>
+      <button class="close-icon-btn" type="button" (click)="closeAddEditModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    
+    <div class="dialog-body">
+      <!-- Category Selection -->
+      <div class="field-item">
+        <label class="field-label">Category *</label>
+        <div class="select-box-wrap">
+          <select class="field-input select-styled" [(ngModel)]="formCategory">
+            <option *ngFor="let c of categoriesList" [value]="c.name">{{ c.name }}</option>
+          </select>
+          <span class="material-symbols-outlined arrow-down">expand_more</span>
+        </div>
+      </div>
+
+      <!-- Limit Amount -->
+      <div class="field-item">
+        <label class="field-label">Limit Amount ({{ currency }}) *</label>
+        <input type="number" class="field-input" placeholder="e.g. 500" [(ngModel)]="formAllocated" min="1" />
+      </div>
+
+      <!-- Period & Theme Row -->
+      <div class="field-row">
+        <div class="field-item col-50">
+          <label class="field-label">Period</label>
+          <div class="select-box-wrap">
+            <select class="field-input select-styled" [(ngModel)]="formPeriod">
+              <option value="MONTHLY">Monthly</option>
+              <option value="WEEKLY">Weekly</option>
+              <option value="YEARLY">Yearly</option>
+            </select>
+            <span class="material-symbols-outlined arrow-down">expand_more</span>
+          </div>
+        </div>
+
+        <div class="field-item col-50">
+          <label class="field-label">Icon Color Theme</label>
+          <div class="select-box-wrap">
+            <select class="field-input select-styled" [(ngModel)]="formTheme">
+              <option value="blue">Blue</option>
+              <option value="yellow">Yellow</option>
+              <option value="red">Red</option>
+            </select>
+            <span class="material-symbols-outlined arrow-down">expand_more</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Icon Select -->
+      <div class="field-item">
+        <label class="field-label">Icon</label>
+        <div class="select-box-wrap">
+          <select class="field-input select-styled" [(ngModel)]="formIcon">
+            <option value="account_balance_wallet">Wallet</option>
+            <option value="restaurant">Food & Dining</option>
+            <option value="directions_car">Transport</option>
+            <option value="shopping_bag">Shopping</option>
+            <option value="receipt_long">Bills & Utilities</option>
+            <option value="movie">Entertainment</option>
+            <option value="favorite">Health</option>
+            <option value="school">Education</option>
+            <option value="flight">Travel</option>
+          </select>
+          <span class="material-symbols-outlined arrow-down">expand_more</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-footer-row">
+      <button class="btn-modal-cancel" type="button" (click)="closeAddEditModal()">Cancel</button>
+      <button class="btn-primary-add-budget-submit" type="button" (click)="saveBudget()">
+        {{ isEditMode ? 'Save Changes' : 'Create Budget' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal Dialog -->
+<div class="modal-backdrop" *ngIf="isDeleteModalOpen" (click)="closeDeleteModal()">
+  <div class="delete-modal-dialog" (click)="$event.stopPropagation()">
+    <div class="alert-icon-ring">
+      <span class="material-symbols-outlined alert-triangle-icon">warning</span>
+    </div>
+    <h2 class="delete-modal-heading">Delete Budget?</h2>
+    <p class="delete-modal-desc">
+      Are you sure you want to remove the budget for "{{ budgetToDelete?.category }}"? This action cannot be undone.
+    </p>
+    <div class="delete-modal-actions">
+      <button class="btn-modal-cancel" type="button" (click)="closeDeleteModal()">Cancel</button>
+      <button class="btn-modal-delete" type="button" (click)="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>

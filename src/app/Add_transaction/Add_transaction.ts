@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TransactionService } from '../services/transaction.service';
+import { TransactionService, CategoryItem } from '../services/transaction.service';
 
 @Component({
   selector: 'app-add-transaction',
@@ -13,7 +13,7 @@ import { TransactionService } from '../services/transaction.service';
 })
 export class AddTransaction implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
-  private sub!: Subscription;
+  private sub = new Subscription();
 
   isOpen = false;
   type: 'Expense' | 'Income' = 'Expense';
@@ -25,19 +25,40 @@ export class AddTransaction implements OnInit, OnDestroy {
   notes = '';
   isSubmitted = false;
 
+  currency = '€';
+  categoriesList: CategoryItem[] = [];
+
   ngOnInit(): void {
-    this.sub = this.txService.isModalOpen$.subscribe(state => {
-      this.isOpen = state;
-    });
+    this.sub.add(
+      this.txService.isModalOpen$.subscribe(state => (this.isOpen = state))
+    );
+    this.sub.add(
+      this.txService.categories$.subscribe(cats => (this.categoriesList = cats))
+    );
+    this.sub.add(
+      this.txService.currency$.subscribe(curr => (this.currency = curr))
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   close(): void {
     this.resetForm();
     this.txService.closeModal();
+  }
+
+  validateYearLength(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value) {
+      const parts = input.value.split('-');
+      if (parts[0] && parts[0].length > 4) {
+        parts[0] = parts[0].slice(0, 4);
+        input.value = parts.join('-');
+        this.date = input.value;
+      }
+    }
   }
 
   save(): void {
@@ -46,52 +67,23 @@ export class AddTransaction implements OnInit, OnDestroy {
       return;
     }
 
+    const year = new Date(this.date).getFullYear();
+    if (isNaN(year) || year < 1900 || year > 2099) {
+      return;
+    }
+
     const isExpense = this.type === 'Expense';
     const computedAmount = isExpense ? -Math.abs(this.amount) : Math.abs(this.amount);
 
-    const normCat = this.txService.normalizeCategory(this.category);
-    let finalCategoryName = this.category;
-    let icon = 'receipt_long';
-    let iconBg = '#f1f5f9';
-    let iconColor = '#475569';
-
-    if (normCat === 'shopping') {
-      finalCategoryName = 'Shopping';
-      icon = 'shopping_bag';
-      iconBg = '#dcfce7';
-      iconColor = '#059669';
-    } else if (normCat === 'food & dining') {
-      finalCategoryName = 'Food & Dining';
-      icon = 'restaurant';
-      iconBg = '#ede9fe';
-      iconColor = '#6366f1';
-    } else if (normCat === 'transport') {
-      finalCategoryName = 'Transport';
-      icon = 'directions_car';
-      iconBg = '#ffe4e6';
-      iconColor = '#881337';
-    } else if (normCat === 'income') {
-      finalCategoryName = 'Income';
-      icon = 'payments';
-      iconBg = '#d1fae5';
-      iconColor = '#10b981';
-    } else if (normCat === 'entertainment') {
-      finalCategoryName = 'Entertainment';
-      icon = 'movie';
-      iconBg = '#fee2e2';
-      iconColor = '#ef4444';
-    }
-
-    const parsedDate = new Date(this.date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric'
-    });
+    const foundCategory = this.categoriesList.find(c => c.name === this.category);
+    let icon = foundCategory?.icon || 'receipt_long';
+    let iconBg = foundCategory?.iconBg || (isExpense ? '#ede9fe' : '#dcfce7');
+    let iconColor = foundCategory?.iconColor || (isExpense ? '#6366f1' : '#10b981');
 
     this.txService.addTransaction({
       name: this.description.trim(),
-      category: finalCategoryName,
-      date: parsedDate,
+      category: this.category,
+      date: this.date,
       method: this.method,
       amount: computedAmount,
       icon,

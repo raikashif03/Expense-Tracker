@@ -13,7 +13,7 @@ import { TransactionService, TransactionItem } from '../services/transaction.ser
 })
 export class Transaction implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
-  private sub!: Subscription;
+  private sub = new Subscription();
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
@@ -26,15 +26,39 @@ export class Transaction implements OnInit, OnDestroy {
   sortOrder = 'Newest First';
 
   transactionsList: TransactionItem[] = [];
+  categoriesList: string[] = [];
+  currency = '€';
+  dateFormat = 'MMM dd, yyyy';
+
+  // Pagination Controls
+  currentPage = 1;
+  pageSize = 5;
 
   ngOnInit(): void {
-    this.sub = this.txService.transactions$.subscribe(list => {
-      this.transactionsList = list;
-    });
+    this.sub.add(
+      this.txService.transactions$.subscribe(list => {
+        this.transactionsList = list;
+        this.clampPage();
+      })
+    );
+
+    this.sub.add(
+      this.txService.categories$.subscribe(cats => {
+        this.categoriesList = cats.map(c => c.name);
+      })
+    );
+
+    this.sub.add(
+      this.txService.currency$.subscribe(curr => (this.currency = curr))
+    );
+
+    this.sub.add(
+      this.txService.dateFormat$.subscribe(fmt => (this.dateFormat = fmt))
+    );
   }
 
   ngOnDestroy(): void {
-    if (this.sub) this.sub.unsubscribe();
+    this.sub.unsubscribe();
   }
 
   openAddModal(): void {
@@ -55,7 +79,7 @@ export class Transaction implements OnInit, OnDestroy {
   }
 
   get filteredTransactions(): TransactionItem[] {
-    return this.transactionsList.filter(item => {
+    const filtered = this.transactionsList.filter(item => {
       const matchSearch = !this.searchQuery.trim() ||
         item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -69,5 +93,59 @@ export class Transaction implements OnInit, OnDestroy {
 
       return matchSearch && matchType && matchCat;
     });
+
+    if (this.sortOrder === 'Newest First') {
+      filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } else {
+      filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+
+    return filtered;
+  }
+
+  get paginatedTransactions(): TransactionItem[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredTransactions.slice(start, start + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredTransactions.length / this.pageSize) || 1;
+  }
+
+  get pagesArray(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  get startEntryIndex(): number {
+    if (this.filteredTransactions.length === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  get endEntryIndex(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredTransactions.length);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  private clampPage(): void {
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = Math.max(1, this.totalPages);
+    }
   }
 }

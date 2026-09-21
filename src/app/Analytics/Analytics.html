@@ -1,5 +1,4 @@
 <main class="analytics-viewport">
-  <!-- Top Navigation -->
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
@@ -14,8 +13,8 @@
         <span class="material-symbols-outlined">notifications</span>
       </button>
       <button class="btn-top-add" type="button" (click)="openAddModal()">
-       <span class="material-symbols-outlined">add</span>
-       Add Transaction
+        <span class="material-symbols-outlined">add</span>
+        Add Transaction
       </button>
       <div class="user-avatar-ring">
         <img [src]="user.avatar" alt="Profile" />
@@ -23,20 +22,18 @@
     </div>
   </header>
 
-  <!-- Title -->
   <div class="page-title-section">
     <h1 class="page-heading">Analytics</h1>
     <p class="page-subheading">Understand where your money goes based on live records.</p>
   </div>
 
-  <!-- Top KPI Cards -->
   <section class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-card-header">
         <span class="kpi-tag">TOTAL SPENT</span>
         <div class="kpi-icon-pill icon-pink"><span class="material-symbols-outlined">show_chart</span></div>
       </div>
-      <div class="kpi-val">€{{ totalSpent | number:'1.2-2' }}</div>
+      <div class="kpi-val">{{ currency }}{{ totalSpent | number:'1.2-2' }}</div>
       <div class="kpi-trend text-muted">From {{ transactions.length }} total transactions</div>
     </div>
 
@@ -47,7 +44,7 @@
       </div>
       <div class="kpi-val">{{ largestExpense.name }}</div>
       <div class="kpi-trend text-muted" *ngIf="totalSpent > 0">
-        €{{ largestExpense.amount | number:'1.2-2' }} ({{ largestExpense.percentage }}% of total)
+        {{ currency }}{{ largestExpense.amount | number:'1.2-2' }} ({{ largestExpense.percentage }}% of total)
       </div>
       <div class="kpi-trend text-muted" *ngIf="totalSpent === 0">No expenses recorded</div>
     </div>
@@ -64,10 +61,7 @@
     </div>
   </section>
 
-  <!-- Top Row: Spending Trend & Category Breakdown -->
   <section class="charts-grid">
-    
-    <!-- Spending Trend -->
     <div class="panel-card">
       <div class="panel-header">
         <h2 class="panel-title">Spending Trend</h2>
@@ -79,12 +73,10 @@
       </div>
 
       <div class="trend-layout">
-        <!-- Y-Axis Labels -->
         <div class="y-axis-labels">
           <span *ngFor="let label of yTrendLabels">{{ label | number }}</span>
         </div>
 
-        <!-- Wave Chart Area -->
         <div class="trend-chart-container">
           <svg class="trend-svg" viewBox="0 0 560 170" preserveAspectRatio="none">
             <defs>
@@ -97,7 +89,6 @@
             <path [attr.d]="chartPath" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" />
           </svg>
 
-          <!-- X-Axis Labels (W1 to W12) -->
           <div class="x-axis-ticks">
             <span *ngFor="let w of trendWeeks">{{ w }}</span>
           </div>
@@ -105,7 +96,6 @@
       </div>
     </div>
 
-    <!-- Category Breakdown Donut -->
     <div class="panel-card">
       <div class="panel-header">
         <h2 class="panel-title">Category Breakdown</h2>
@@ -115,7 +105,7 @@
         <div class="donut-ring" [style.background]="donutGradient">
           <div class="donut-inner-cutout">
             <span class="donut-label">Total</span>
-            <span class="donut-val">€{{ totalSpent | number:'1.0-0' }}</span>
+            <span class="donut-val">{{ currency }}{{ totalSpent | number:'1.0-0' }}</span>
           </div>
         </div>
       </div>
@@ -133,13 +123,9 @@
         </div>
       </div>
     </div>
-
   </section>
 
-  <!-- Bottom Row: Cash Flow & Top Categories -->
   <section class="bottom-grid">
-
-    <!-- Cash Flow Multi-Month Bar Chart -->
     <div class="panel-card">
       <div class="panel-header">
         <h2 class="panel-title">Cash Flow</h2>
@@ -150,12 +136,10 @@
       </div>
 
       <div class="cashflow-layout">
-        <!-- Y-Axis Labels -->
         <div class="y-axis-labels">
           <span *ngFor="let label of yCashFlowLabels">{{ label | number }}</span>
         </div>
 
-        <!-- Monthly Bars Area -->
         <div class="cashflow-bars-area">
           <div class="month-bar-group" *ngFor="let col of cashFlowMonths">
             <div class="bars-pair">
@@ -168,19 +152,17 @@
       </div>
     </div>
 
-    <!-- Top Categories -->
     <div class="panel-card top-cat-card">
       <div class="panel-header">
         <h2 class="panel-title">Top Categories</h2>
         <span class="view-all-text">View All</span>
       </div>
 
-      <!-- Aligned list with compact gaps -->
       <div class="progress-list" *ngIf="categoryBreakdown.length > 0">
         <div class="progress-row" *ngFor="let cat of categoryBreakdown">
           <div class="progress-labels">
             <span class="category-name">{{ cat.name }}</span>
-            <span class="category-sum">€{{ cat.amount | number:'1.2-2' }}</span>
+            <span class="category-sum">{{ currency }}{{ cat.amount | number:'1.2-2' }}</span>
           </div>
           <div class="track-line">
             <div class="fill-line" [style.background-color]="cat.color" [style.width.%]="cat.percentage"></div>
@@ -192,6 +174,5 @@
         No category spending recorded yet.
       </div>
     </div>
-
   </section>
 </main>

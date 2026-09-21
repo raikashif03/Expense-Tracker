@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TransactionService } from '../services/transaction.service';
+import { ThemeService } from '../services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class Settings implements OnInit {
   private readonly STORAGE_KEY = 'fintrack_user_settings_v1';
+  private txService = inject(TransactionService);
+  private themeService = inject(ThemeService);
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
@@ -20,7 +24,7 @@ export class Settings implements OnInit {
   };
 
   preferences = {
-    currency: 'USD ($) - US Dollar',
+    currency: 'EUR (€) - Euro',
     weekStart: 'Monday',
     dateFormat: 'MM/DD/YYYY',
     theme: 'Light'
@@ -47,13 +51,24 @@ export class Settings implements OnInit {
         if (parsed.preferences) this.preferences = { ...this.preferences, ...parsed.preferences };
         if (parsed.notifications) this.notifications = { ...this.notifications, ...parsed.notifications };
       }
-    } catch {
-      // Fallback to default state
-    }
+    } catch {}
+  }
+
+  onCurrencyChange(): void {
+    this.txService.setCurrency(this.preferences.currency);
+  }
+
+  onDateFormatChange(): void {
+    this.txService.setDateFormat(this.preferences.dateFormat);
   }
 
   setTheme(mode: string): void {
     this.preferences.theme = mode;
+    if (mode === 'Dark') {
+      document.body.classList.add('dark-mode');
+    } else if (mode === 'Light') {
+      document.body.classList.remove('dark-mode');
+    }
   }
 
   saveSettings(): void {
@@ -64,6 +79,9 @@ export class Settings implements OnInit {
     };
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
 
+    this.txService.setCurrency(this.preferences.currency);
+    this.txService.setDateFormat(this.preferences.dateFormat);
+
     this.showToast = true;
     setTimeout(() => {
       this.showToast = false;
@@ -72,5 +90,7 @@ export class Settings implements OnInit {
 
   cancelSettings(): void {
     this.loadSettings();
+    this.txService.setCurrency(this.preferences.currency);
+    this.txService.setDateFormat(this.preferences.dateFormat);
   }
 }

@@ -41,7 +41,7 @@
       <span class="cat-tx-count">{{ cat.transactionsCount }} TRANSACTIONS</span>
       <div class="cat-divider"></div>
       <div class="cat-amount" [ngClass]="cat.type === 'earned' ? 'earned-text' : 'spent-text'">
-        €{{ cat.spentAmount | number:'1.2-2' }} {{ cat.type }}
+        {{ currency }}{{ cat.spentAmount | number:'1.2-2' }} {{ cat.type }}
       </div>
     </div>
   </section>
@@ -75,10 +75,6 @@
       <div class="field-item">
         <label class="field-label">Category Name *</label>
         <input type="text" class="field-input" placeholder="e.g. Groceries, Gym" [(ngModel)]="formCategoryName" />
-      </div>
-      <div class="field-item">
-        <label class="field-label">Amount (€)</label>
-        <input type="number" class="field-input" placeholder="0.00" [(ngModel)]="formCategoryAmount" />
       </div>
       <div class="field-row">
         <div class="field-item col-50">

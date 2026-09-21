@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 
 export interface TransactionItem {
   id: string;
@@ -39,9 +39,10 @@ export interface BudgetItem {
   providedIn: 'root'
 })
 export class TransactionService {
-  private readonly TX_KEY = 'fintrack_tx_clean_v5';
-  private readonly CAT_KEY = 'fintrack_cat_clean_v5';
-  private readonly BUD_KEY = 'fintrack_bud_clean_v5';
+  private readonly TX_KEY = 'fintrack_tx_clean_v9';
+  private readonly CAT_KEY = 'fintrack_cat_clean_v9';
+  private readonly BUD_KEY = 'fintrack_bud_clean_v9';
+  private readonly SETTINGS_KEY = 'fintrack_user_settings_v1';
 
   private isModalOpenSubject = new BehaviorSubject<boolean>(false);
   isModalOpen$ = this.isModalOpenSubject.asObservable();
@@ -54,10 +55,10 @@ export class TransactionService {
   private categoriesSubject = new BehaviorSubject<CategoryItem[]>(
     this.loadStorage(this.CAT_KEY, [
       { id: 'cat-1', name: 'Food & Dining', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'restaurant', iconBg: '#ede9fe', iconColor: '#6366f1' },
-      { id: 'cat-2', name: 'Transport', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'directions_car', iconBg: '#ede9fe', iconColor: '#6366f1' },
-      { id: 'cat-3', name: 'Shopping', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'shopping_bag', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-2', name: 'Transport', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'directions_car', iconBg: '#ffe4e6', iconColor: '#881337' },
+      { id: 'cat-3', name: 'Shopping', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'shopping_bag', iconBg: '#dcfce7', iconColor: '#059669' },
       { id: 'cat-4', name: 'Bills & Utilities', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'receipt_long', iconBg: '#ede9fe', iconColor: '#6366f1' },
-      { id: 'cat-5', name: 'Entertainment', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'movie', iconBg: '#ede9fe', iconColor: '#6366f1' },
+      { id: 'cat-5', name: 'Entertainment', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'movie', iconBg: '#fee2e2', iconColor: '#ef4444' },
       { id: 'cat-6', name: 'Health & Wellness', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'favorite', iconBg: '#ede9fe', iconColor: '#6366f1' },
       { id: 'cat-7', name: 'Education', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'school', iconBg: '#ede9fe', iconColor: '#6366f1' },
       { id: 'cat-8', name: 'Travel', transactionsCount: 0, spentAmount: 0, type: 'spent', icon: 'flight', iconBg: '#ede9fe', iconColor: '#6366f1' },
@@ -75,6 +76,13 @@ export class TransactionService {
   );
   budgets$ = this.budgetsSubject.asObservable();
 
+  // Global Settings Subjects
+  private currencySubject = new BehaviorSubject<string>(this.getInitialCurrency());
+  currency$ = this.currencySubject.asObservable();
+
+  private dateFormatSubject = new BehaviorSubject<string>(this.getInitialDateFormat());
+  dateFormat$ = this.dateFormatSubject.asObservable();
+
   constructor() {
     this.syncCategoryTotals();
   }
@@ -90,6 +98,50 @@ export class TransactionService {
 
   private saveStorage(key: string, data: any): void {
     localStorage.setItem(key, JSON.stringify(data));
+  }
+
+  private getInitialCurrency(): string {
+    try {
+      const raw = localStorage.getItem(this.SETTINGS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const curr = parsed.preferences?.currency || '';
+        if (curr.includes('$')) return '$';
+        if (curr.includes('£')) return '£';
+        if (curr.includes('€')) return '€';
+      }
+    } catch {}
+    return '€';
+  }
+
+  private getInitialDateFormat(): string {
+    try {
+      const raw = localStorage.getItem(this.SETTINGS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const fmt = parsed.preferences?.dateFormat;
+        if (fmt === 'MM/DD/YYYY') return 'MM/dd/yyyy';
+        if (fmt === 'DD/MM/YYYY') return 'dd/MM/yyyy';
+        if (fmt === 'YYYY-MM-DD') return 'yyyy-MM-dd';
+      }
+    } catch {}
+    return 'MMM dd, yyyy';
+  }
+
+  setCurrency(currencyStr: string): void {
+    let symbol = '€';
+    if (currencyStr.includes('$')) symbol = '$';
+    else if (currencyStr.includes('£')) symbol = '£';
+    else if (currencyStr.includes('€')) symbol = '€';
+    this.currencySubject.next(symbol);
+  }
+
+  setDateFormat(format: string): void {
+    let mapped = 'MMM dd, yyyy';
+    if (format === 'MM/DD/YYYY') mapped = 'MM/dd/yyyy';
+    else if (format === 'DD/MM/YYYY') mapped = 'dd/MM/yyyy';
+    else if (format === 'YYYY-MM-DD') mapped = 'yyyy-MM-dd';
+    this.dateFormatSubject.next(mapped);
   }
 
   openModal(): void {
@@ -128,6 +180,7 @@ export class TransactionService {
       : [...current, item];
     this.categoriesSubject.next(updated);
     this.saveStorage(this.CAT_KEY, updated);
+    this.syncCategoryTotals();
   }
 
   deleteCategory(id: string): void {
@@ -148,12 +201,28 @@ export class TransactionService {
     }
   }
 
+  saveBudget(budget: BudgetItem): void {
+    const current = this.budgetsSubject.getValue();
+    const index = current.findIndex(b => b.id === budget.id);
+    const updated = index > -1
+      ? current.map((b, i) => (i === index ? budget : b))
+      : [...current, budget];
+    this.budgetsSubject.next(updated);
+    this.saveStorage(this.BUD_KEY, updated);
+  }
+
+  deleteBudget(id: string): void {
+    const updated = this.budgetsSubject.getValue().filter(b => b.id !== id);
+    this.budgetsSubject.next(updated);
+    this.saveStorage(this.BUD_KEY, updated);
+  }
+
   normalizeCategory(cat: string): string {
     const lower = (cat || '').toLowerCase().trim();
     if (lower.includes('transport')) return 'transport';
     if (lower.includes('food') || lower.includes('dining')) return 'food & dining';
     if (lower.includes('income') || lower.includes('salary')) return 'income';
-    if (lower.includes('shop') || lower.includes('shoop')) return 'shopping';
+    if (lower.includes('shop')) return 'shopping';
     if (lower.includes('bill') || lower.includes('util')) return 'bills & utilities';
     if (lower.includes('entertain') || lower.includes('movie')) return 'entertainment';
     if (lower.includes('health') || lower.includes('well')) return 'health & wellness';
@@ -167,6 +236,7 @@ export class TransactionService {
     const cats = this.categoriesSubject.getValue().map(cat => {
       const normCatName = this.normalizeCategory(cat.name);
       const matchingTxs = txs.filter(t => this.normalizeCategory(t.category) === normCatName);
+      
       const sum = matchingTxs.reduce((acc, curr) => acc + Math.abs(curr.amount), 0);
       return {
         ...cat,
@@ -190,10 +260,6 @@ export class TransactionService {
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
   }
 
-  getTotalBalance(): number {
-    return this.getTotalIncome() - this.getTotalExpense();
-  }
-
   getSavingsRate(): number {
     const income = this.getTotalIncome();
     if (income <= 0) return 0;
@@ -208,21 +274,11 @@ export class TransactionService {
     this.transactionsSubject.getValue()
       .filter(t => t.amount < 0)
       .forEach(t => {
-        const norm = this.normalizeCategory(t.category);
-        let key = t.category || 'Other';
-        if (norm === 'transport') key = 'Transport';
-        if (norm === 'food & dining') key = 'Food & Dining';
-        if (norm === 'shopping') key = 'Shopping';
-        if (norm === 'entertainment') key = 'Entertainment';
-        if (norm === 'bills & utilities') key = 'Bills & Utilities';
-        if (norm === 'health & wellness') key = 'Health & Wellness';
-        if (norm === 'education') key = 'Education';
-        if (norm === 'travel') key = 'Travel';
-
-        grouped.set(key, (grouped.get(key) || 0) + Math.abs(t.amount));
+        const catName = t.category || 'Other';
+        grouped.set(catName, (grouped.get(catName) || 0) + Math.abs(t.amount));
       });
 
-    const palette = ['#881337', '#3b3bf5', '#059669', '#d97706', '#6366f1', '#ec4899'];
+    const palette = ['#881337', '#3b3bf5', '#059669', '#d97706', '#6366f1', '#ec4899', '#0284c7'];
     let idx = 0;
 
     return Array.from(grouped.entries())
@@ -236,7 +292,21 @@ export class TransactionService {
   }
 
   getLargestExpense(): { name: string; amount: number; percentage: number } {
-    const list = this.getCategoryBreakdown();
-    return list.length > 0 ? list[0] : { name: 'None', amount: 0, percentage: 0 };
+    const expenses = this.transactionsSubject.getValue().filter(t => t.amount < 0);
+    if (expenses.length === 0) return { name: 'None', amount: 0, percentage: 0 };
+
+    const totalSpent = this.getTotalExpense();
+    const maxItem = expenses.reduce((prev, curr) => 
+      Math.abs(curr.amount) > Math.abs(prev.amount) ? curr : prev
+    );
+
+    const amount = Math.abs(maxItem.amount);
+    const percentage = totalSpent > 0 ? Math.round((amount / totalSpent) * 100) : 0;
+
+    return {
+      name: maxItem.category || maxItem.name,
+      amount,
+      percentage
+    };
   }
 }

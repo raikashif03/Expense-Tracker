@@ -90,9 +90,9 @@
           <div class="field-item">
             <label class="field-label">Currency</label>
             <div class="custom-select-wrap">
-              <select class="select-input" [(ngModel)]="preferences.currency">
-                <option value="USD ($) - US Dollar">USD ($) - US Dollar</option>
+              <select class="select-input" [(ngModel)]="preferences.currency" (ngModelChange)="onCurrencyChange()">
                 <option value="EUR (€) - Euro">EUR (€) - Euro</option>
+                <option value="USD ($) - US Dollar">USD ($) - US Dollar</option>
                 <option value="GBP (£) - British Pound">GBP (£) - British Pound</option>
               </select>
               <span class="material-symbols-outlined select-chevron">expand_more</span>
@@ -115,7 +115,7 @@
             <div class="field-item">
               <label class="field-label">Date Format</label>
               <div class="custom-select-wrap">
-                <select class="select-input" [(ngModel)]="preferences.dateFormat">
+                <select class="select-input" [(ngModel)]="preferences.dateFormat" (ngModelChange)="onDateFormatChange()">
                   <option value="MM/DD/YYYY">MM/DD/YYYY</option>
                   <option value="DD/MM/YYYY">DD/MM/YYYY</option>
                   <option value="YYYY-MM-DD">YYYY-MM-DD</option>
