@@ -41,7 +41,7 @@
             <span class="cat-period">{{ item.period }}</span>
           </div>
         </div>
-        <!-- Edit & Delete Action Buttons (Styled like Categories) -->
+        <!-- Edit & Delete Action Buttons -->
         <div class="actions-pill">
           <button class="action-btn edit-btn" type="button" (click)="openEditBudgetModal(item)" title="Edit Budget">
             <span class="material-symbols-outlined icon-small">edit</span>
@@ -85,10 +85,17 @@
         <span>Budget exceeded by {{ currency }}{{ -item.remaining | number:'1.0-0' }}.</span>
       </div>
     </div>
+
+    <!-- Empty State when no budgets are configured -->
+    <div class="empty-notice" *ngIf="budgetsList.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: #94a3b8;">
+      <span class="material-symbols-outlined" style="font-size: 48px; margin-bottom: 12px; display: block; color: #64748b;">account_balance_wallet</span>
+      <p style="font-size: 15px; margin-bottom: 6px; color: #cbd5e1; font-weight: 600;">No budgets created yet.</p>
+      <p style="font-size: 13px;">Click <strong>+ Add Budget</strong> above to create a budget for your expense categories.</p>
+    </div>
   </section>
 </main>
 
-<!-- Add / Edit Budget Modal Dialog (Same style as Category Modal) -->
+<!-- Add / Edit Budget Modal Dialog -->
 <div class="modal-backdrop" *ngIf="isAddEditModalOpen" (click)="closeAddEditModal()">
   <div class="add-edit-modal-dialog" (click)="$event.stopPropagation()">
     <div class="modal-header-row">
@@ -99,11 +106,12 @@
     </div>
     
     <div class="dialog-body">
-      <!-- Category Selection -->
+      <!-- Category Selection with Placeholder -->
       <div class="field-item">
         <label class="field-label">Category *</label>
         <div class="select-box-wrap">
           <select class="field-input select-styled" [(ngModel)]="formCategory">
+            <option value="" disabled selected>Select category</option>
             <option *ngFor="let c of categoriesList" [value]="c.name">{{ c.name }}</option>
           </select>
           <span class="material-symbols-outlined arrow-down">expand_more</span>

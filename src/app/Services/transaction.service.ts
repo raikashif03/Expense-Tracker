@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface TransactionItem {
   id: string;
@@ -41,7 +41,8 @@ export interface BudgetItem {
 export class TransactionService {
   private readonly TX_KEY = 'fintrack_tx_clean_v9';
   private readonly CAT_KEY = 'fintrack_cat_clean_v9';
-  private readonly BUD_KEY = 'fintrack_bud_clean_v9';
+  // Bumped to v10 to clear initial mock data permanently
+  private readonly BUD_KEY = 'fintrack_bud_clean_v10';
   private readonly SETTINGS_KEY = 'fintrack_user_settings_v1';
 
   private isModalOpenSubject = new BehaviorSubject<boolean>(false);
@@ -67,12 +68,9 @@ export class TransactionService {
   );
   categories$ = this.categoriesSubject.asObservable();
 
+  // Clean empty storage array for budgets
   private budgetsSubject = new BehaviorSubject<BudgetItem[]>(
-    this.loadStorage(this.BUD_KEY, [
-      { id: 'b-1', category: 'Food & Dining', period: 'MONTHLY', allocated: 500, icon: 'restaurant', iconTheme: 'blue' },
-      { id: 'b-2', category: 'Transport', period: 'MONTHLY', allocated: 250, icon: 'directions_car', iconTheme: 'yellow' },
-      { id: 'b-3', category: 'Shopping', period: 'MONTHLY', allocated: 300, icon: 'shopping_bag', iconTheme: 'red' }
-    ])
+    this.loadStorage(this.BUD_KEY, [])
   );
   budgets$ = this.budgetsSubject.asObservable();
 
@@ -203,10 +201,26 @@ export class TransactionService {
 
   saveBudget(budget: BudgetItem): void {
     const current = this.budgetsSubject.getValue();
-    const index = current.findIndex(b => b.id === budget.id);
-    const updated = index > -1
-      ? current.map((b, i) => (i === index ? budget : b))
-      : [...current, budget];
+    
+    // Check if category or budget ID already exists to avoid creating duplicate cards
+    const existingIndex = current.findIndex(b => 
+      b.id === budget.id || 
+      this.normalizeCategory(b.category) === this.normalizeCategory(budget.category)
+    );
+
+    let updated: BudgetItem[];
+    if (existingIndex > -1) {
+      // Update existing budget for this category
+      updated = current.map((b, i) => 
+        i === existingIndex 
+          ? { ...budget, id: b.id, category: budget.category } 
+          : b
+      );
+    } else {
+      // Add new category budget
+      updated = [...current, budget];
+    }
+
     this.budgetsSubject.next(updated);
     this.saveStorage(this.BUD_KEY, updated);
   }

@@ -150,10 +150,12 @@
                     {{ item.amount > 0 ? '+' : '-' }}{{ currency }}{{ getAbs(item.amount) | number:'1.2-2' }}
                   </span>
                 </td>
-              </tr>
-              <tr *ngIf="recentTransactions.length === 0">
-                <td colspan="3" class="empty-notice">No transactions added yet.</td>
-              </tr>
+              <<!-- Inside <table class="recent-table"> <tbody> -->
+<tr *ngIf="recentTransactions.length === 0">
+  <td colspan="3" class="empty-notice-cell" style="text-align: center; padding: 36px 16px; color: #94a3b8;">
+    No transactions added yet.
+  </td>
+</tr>
             </tbody>
           </table>
         </div>

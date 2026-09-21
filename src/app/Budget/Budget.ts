@@ -44,15 +44,14 @@ export class Budget implements OnInit, OnDestroy {
   budgetToDelete: BudgetItem | null = null;
 
   ngOnInit(): void {
-    // Combine observables so any change to transactions or budgets triggers a recalculation
     this.sub.add(
       combineLatest([
         this.txService.transactions$,
         this.txService.budgets$,
         this.txService.categories$
-      ]).subscribe(([_, rawBudgets, cats]) => {
-        this.categoriesList = cats;
-        this.recalculateBudgets(rawBudgets);
+      ]).subscribe(([_, savedBudgets, cats]) => {
+        this.categoriesList = cats.filter(c => c.type !== 'earned');
+        this.recalculateBudgets(savedBudgets);
       })
     );
 
@@ -65,32 +64,70 @@ export class Budget implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
-  private recalculateBudgets(rawBudgets: BudgetItem[]): void {
+  private recalculateBudgets(savedBudgets: BudgetItem[]): void {
     const breakdown = this.txService.getCategoryBreakdown();
+    const mergedList: BudgetViewItem[] = [];
+    const processedCategories = new Set<string>();
 
-    this.budgetsList = rawBudgets.map(b => {
-      const match = breakdown.find(c => 
-        this.txService.normalizeCategory(c.name) === this.txService.normalizeCategory(b.category)
-      );
+    // 1. Process all explicitly configured budgets
+    for (const b of savedBudgets) {
+      const normName = this.txService.normalizeCategory(b.category);
+      processedCategories.add(normName);
+
+      const match = breakdown.find(c => this.txService.normalizeCategory(c.name) === normName);
       const spent = match ? match.amount : 0;
       const remaining = b.allocated - spent;
       const percentUsed = b.allocated > 0 ? Math.round((spent / b.allocated) * 100) : 0;
 
-      return {
+      mergedList.push({
         ...b,
         spent,
         remaining,
         percentUsed,
         isClose: percentUsed >= 85 && percentUsed <= 100,
-        isExceeded: spent > b.allocated // Triggers the red progress bar and red border
-      };
-    });
+        isExceeded: spent > b.allocated
+      });
+    }
+
+    // 2. Automatically show any expense category where money has been spent
+    for (const item of breakdown) {
+      const normCat = this.txService.normalizeCategory(item.name);
+      if (!processedCategories.has(normCat)) {
+        processedCategories.add(normCat);
+
+        const foundCategory = this.categoriesList.find(
+          c => this.txService.normalizeCategory(c.name) === normCat
+        );
+
+        const defaultAllocated = 300;
+        const spent = item.amount;
+        const remaining = defaultAllocated - spent;
+        const percentUsed = Math.round((spent / defaultAllocated) * 100);
+
+        mergedList.push({
+          id: `auto-${normCat}`,
+          category: foundCategory ? foundCategory.name : item.name,
+          period: 'MONTHLY',
+          allocated: defaultAllocated,
+          icon: foundCategory ? foundCategory.icon : 'account_balance_wallet',
+          iconTheme: percentUsed > 100 ? 'red' : 'blue',
+          spent,
+          remaining,
+          percentUsed,
+          isClose: percentUsed >= 85 && percentUsed <= 100,
+          isExceeded: spent > defaultAllocated
+        });
+      }
+    }
+
+    this.budgetsList = mergedList;
   }
 
-  openCreateBudgetModal(): void {
+  openCreateBudgetModal(defaultCat?: string): void {
     this.isEditMode = false;
     this.currentEditId = null;
-    this.formCategory = this.categoriesList.length > 0 ? this.categoriesList[0].name : 'Food & Dining';
+    // Default to blank to show "Select category" placeholder
+    this.formCategory = defaultCat || '';
     this.formAllocated = null;
     this.formPeriod = 'MONTHLY';
     this.formIcon = 'account_balance_wallet';
@@ -100,8 +137,14 @@ export class Budget implements OnInit, OnDestroy {
 
   openEditBudgetModal(b: BudgetItem): void {
     this.isEditMode = true;
-    this.currentEditId = b.id;
-    this.formCategory = b.category;
+    this.currentEditId = b.id.startsWith('auto-') ? null : b.id;
+
+    // Securely match category option from existing category list
+    const matched = this.categoriesList.find(c => 
+      this.txService.normalizeCategory(c.name) === this.txService.normalizeCategory(b.category)
+    );
+
+    this.formCategory = matched ? matched.name : b.category;
     this.formAllocated = b.allocated;
     this.formPeriod = b.period;
     this.formIcon = b.icon;
@@ -114,14 +157,20 @@ export class Budget implements OnInit, OnDestroy {
   }
 
   saveBudget(): void {
-    if (!this.formCategory || !this.formAllocated || this.formAllocated <= 0) return;
+    if (!this.formCategory || this.formCategory === '' || !this.formAllocated || this.formAllocated <= 0) {
+      return;
+    }
+
+    const matchedCategory = this.categoriesList.find(c => 
+      this.txService.normalizeCategory(c.name) === this.txService.normalizeCategory(this.formCategory)
+    );
 
     const item: BudgetItem = {
       id: this.currentEditId || `bud-${Date.now()}`,
       category: this.formCategory,
       allocated: Math.abs(this.formAllocated),
       period: this.formPeriod,
-      icon: this.formIcon,
+      icon: matchedCategory ? matchedCategory.icon : this.formIcon,
       iconTheme: this.formTheme
     };
 

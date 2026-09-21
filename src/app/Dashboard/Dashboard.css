@@ -4,16 +4,17 @@
 
 .dashboard-viewport {
   width: 100%;
-  height: 100vh;
-  max-height: 100vh;
+  min-height: 100vh;
+  height: auto;
   overflow-y: auto;
-  padding: 14px 34px 28px;
+  padding: 14px 34px 40px;
   background-color: #f8fafc;
   color: #0f172a;
   display: flex;
   flex-direction: column;
 }
 
+/* ---------------- TOP NAVBAR ---------------- */
 .top-nav-bar {
   display: flex;
   align-items: center;
@@ -61,6 +62,7 @@
   object-fit: cover;
 }
 
+/* ---------------- WELCOME HEADER ---------------- */
 .welcome-section {
   margin-bottom: 18px;
   flex-shrink: 0;
@@ -79,6 +81,7 @@
   margin-top: 4px;
 }
 
+/* ---------------- KPI CARDS ---------------- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -90,7 +93,7 @@
 .kpi-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -150,6 +153,7 @@
 .text-teal  { color: #0d9488; }
 .text-muted { color: #64748b; }
 
+/* ---------------- SPLIT LAYOUT ---------------- */
 .dashboard-split-layout {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -166,7 +170,7 @@
 .card-panel {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 18px 22px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
@@ -196,6 +200,7 @@
 
 .drop-arrow { font-size: 17px; }
 
+/* ---------------- CHART BOX ---------------- */
 .trend-chart-box {
   width: 100%;
   height: 160px;
@@ -230,6 +235,7 @@
   cursor: pointer;
 }
 
+/* ---------------- RECENT TRANSACTIONS TABLE ---------------- */
 .table-container {
   width: 100%;
   overflow-x: auto;
@@ -250,7 +256,6 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-/* Align the AMOUNT header to the right so it sits directly above the amounts */
 .recent-table th:last-child,
 .recent-table th.align-right {
   text-align: right;
@@ -263,12 +268,22 @@
   font-size: 13px;
 }
 
-/* Ensure the amount data cell aligns to the right */
 .recent-table td:last-child,
 .recent-table td.align-right {
   text-align: right;
   padding-right: 2px;
 }
+
+/* Centered Empty Table Notice Cell */
+.recent-table td.empty-notice-cell,
+.recent-table td[colspan="3"] {
+  text-align: center !important;
+  padding: 34px 16px !important;
+  color: #94a3b8 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
 .item-name-group {
   display: flex;
   align-items: center;
@@ -326,6 +341,7 @@
   font-size: 12.5px;
 }
 
+/* ---------------- DONUT & LEGEND ---------------- */
 .donut-center-wrap {
   display: flex;
   justify-content: center;
@@ -402,6 +418,7 @@
   padding: 6px 0;
 }
 
+/* ---------------- BUDGET LIST ---------------- */
 .budget-items-list {
   display: flex;
   flex-direction: column;
@@ -437,4 +454,92 @@
   height: 100%;
   border-radius: 99px;
   transition: width 0.3s ease;
+}
+
+/* ========================================================
+   DASHBOARD DARK MODE SYSTEM
+   ======================================================== */
+:host-context(body.dark-mode) .dashboard-viewport,
+body.dark-mode .dashboard-viewport {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+}
+
+:host-context(body.dark-mode) .welcome-heading,
+body.dark-mode .welcome-heading {
+  color: #f8fafc !important;
+}
+
+:host-context(body.dark-mode) .welcome-subtext,
+body.dark-mode .welcome-subtext {
+  color: #94a3b8 !important;
+}
+
+:host-context(body.dark-mode) .kpi-card,
+body.dark-mode .kpi-card,
+:host-context(body.dark-mode) .card-panel,
+body.dark-mode .card-panel {
+  background-color: #111c34 !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+:host-context(body.dark-mode) .kpi-title,
+body.dark-mode .kpi-title {
+  color: #94a3b8 !important;
+}
+
+:host-context(body.dark-mode) .kpi-value,
+body.dark-mode .kpi-value,
+:host-context(body.dark-mode) .panel-title,
+body.dark-mode .panel-title,
+:host-context(body.dark-mode) .tx-title,
+body.dark-mode .tx-title,
+:host-context(body.dark-mode) .amt-dark,
+body.dark-mode .amt-dark,
+:host-context(body.dark-mode) .donut-total-val,
+body.dark-mode .donut-total-val,
+:host-context(body.dark-mode) .cat-label,
+body.dark-mode .cat-label,
+:host-context(body.dark-mode) .budget-name,
+body.dark-mode .budget-name {
+  color: #f8fafc !important;
+}
+
+:host-context(body.dark-mode) .trend-chart-box,
+body.dark-mode .trend-chart-box {
+  background-color: #16223d !important;
+}
+
+:host-context(body.dark-mode) .donut-cutout,
+body.dark-mode .donut-cutout {
+  background-color: #111c34 !important;
+}
+
+:host-context(body.dark-mode) .recent-table th,
+body.dark-mode .recent-table th {
+  color: #64748b !important;
+  border-bottom-color: #1e293b !important;
+}
+
+:host-context(body.dark-mode) .recent-table td,
+body.dark-mode .recent-table td {
+  border-bottom-color: #1e293b !important;
+}
+
+:host-context(body.dark-mode) .recent-table td.empty-notice-cell,
+:host-context(body.dark-mode) .recent-table td[colspan="3"],
+body.dark-mode .recent-table td.empty-notice-cell,
+body.dark-mode .recent-table td[colspan="3"] {
+  color: #64748b !important;
+}
+
+:host-context(body.dark-mode) .budget-track,
+body.dark-mode .budget-track {
+  background-color: #1e293b !important;
+}
+
+:host-context(body.dark-mode) .budget-numbers,
+body.dark-mode .budget-numbers {
+  color: #94a3b8 !important;
 }
