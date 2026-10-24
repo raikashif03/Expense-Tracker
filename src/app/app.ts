@@ -4,6 +4,7 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { Sidebar } from './Sidebar/sidebar';
 import { AddTransaction } from './Add_transaction/Add_transaction';
+import { LayoutService } from './Services/layout.service';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { AddTransaction } from './Add_transaction/Add_transaction';
 })
 export class App implements OnInit, OnDestroy {
   private router = inject(Router);
+  layoutService = inject(LayoutService);
   private sub = new Subscription();
 
   ngOnInit(): void {

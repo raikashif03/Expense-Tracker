@@ -5,6 +5,7 @@ import { Subscription, combineLatest } from 'rxjs';
 import { TransactionService, BudgetItem, CategoryItem } from '../Services/transaction.service';
 import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
 import { NotificationService } from '../Services/notification.service';
+import { LayoutService } from '../Services/layout.service';
 
 interface BudgetViewItem extends BudgetItem {
   spent: number;
@@ -24,6 +25,7 @@ interface BudgetViewItem extends BudgetItem {
 export class Budget implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
   notifService = inject(NotificationService);
+  layoutService = inject(LayoutService);
   private sub = new Subscription();
 
   user = {

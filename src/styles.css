@@ -51,6 +51,7 @@ app-root {
   overflow: hidden;
   background-color: #f8fafc;
   box-sizing: border-box;
+  position: relative;
 }
 
 app-sidebar {
@@ -74,6 +75,74 @@ app-sidebar {
   overflow-x: hidden;
   background-color: #f8fafc;
   box-sizing: border-box;
+}
+
+/* Mobile Backdrop Overlay */
+.mobile-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+/* Mobile Hamburger Menu Trigger */
+.mobile-menu-trigger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.mobile-menu-trigger:hover {
+  background-color: #f1f5f9;
+}
+
+body.dark-mode .mobile-menu-trigger {
+  background: #16223d !important;
+  border-color: #273553 !important;
+  color: #f8fafc !important;
+}
+
+body.dark-mode .mobile-menu-trigger:hover {
+  background: #1e293b !important;
+}
+
+@media (max-width: 1023px) {
+  app-sidebar {
+    width: 0 !important;
+    min-width: 0 !important;
+  }
+
+  .app-content {
+    width: 100% !important;
+  }
+
+  .mobile-backdrop {
+    display: block;
+  }
+
+  .mobile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-menu-trigger {
+    display: inline-flex;
+  }
 }
 
 /* Completely hide router-outlet placeholder element so it takes zero space */

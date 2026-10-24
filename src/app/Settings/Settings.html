@@ -2,6 +2,9 @@
 
   <!-- Top Search Bar -->
   <header class="top-nav-bar">
+    <button class="mobile-menu-trigger" type="button" (click)="layoutService.toggleSidebar()" aria-label="Open Menu">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
       <input type="text" placeholder="Search transactions, budgets..." />

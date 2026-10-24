@@ -305,3 +305,13 @@ body.dark-mode .notif-footer {
   background-color: #0e172a !important;
   border-top-color: #1e293b !important;
 }
+
+@media (max-width: 480px) {
+  :host {
+    right: -50px;
+  }
+  .notif-dropdown-wrapper {
+    width: 310px;
+    max-width: calc(100vw - 28px);
+  }
+}

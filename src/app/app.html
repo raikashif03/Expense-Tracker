@@ -1,5 +1,12 @@
 <div class="app-layout">
-  <app-sidebar></app-sidebar>
+  <!-- Mobile Drawer Backdrop -->
+  <div 
+    class="mobile-backdrop" 
+    [class.active]="layoutService.isSidebarOpen$ | async" 
+    (click)="layoutService.closeSidebar()">
+  </div>
+
+  <app-sidebar [class.mobile-open]="layoutService.isSidebarOpen$ | async"></app-sidebar>
 
   <main class="app-content">
     <router-outlet></router-outlet>

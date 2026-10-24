@@ -682,3 +682,73 @@ body.dark-mode .icon-slate {
   background-color: #1e293b !important;
   color: #cbd5e1 !important;
 }
+
+/* ========================================================
+   RESPONSIVE DESIGN (TABLETS & MOBILES)
+   ======================================================== */
+@media (max-width: 1023px) {
+  .analytics-viewport {
+    padding: 16px 18px 36px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .charts-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .search-global-box {
+    width: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .analytics-viewport {
+    padding: 12px 14px 28px;
+  }
+
+  .top-nav-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .search-global-box {
+    order: 3;
+    width: 100%;
+  }
+
+  .nav-right-actions {
+    margin-left: auto;
+  }
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-right-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .trend-layout {
+    overflow-x: auto;
+  }
+
+  .cashflow-bars-area {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    min-width: 280px;
+  }
+}

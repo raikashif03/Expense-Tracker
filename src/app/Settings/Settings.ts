@@ -5,6 +5,7 @@ import { TransactionService } from '../Services/transaction.service';
 import { ThemeService } from '../Services/theme.service';
 import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
 import { NotificationService } from '../Services/notification.service';
+import { LayoutService } from '../Services/layout.service';
 
 @Component({
   selector: 'app-settings',
@@ -18,6 +19,7 @@ export class Settings implements OnInit {
   private txService = inject(TransactionService);
   themeService = inject(ThemeService);
   notifService = inject(NotificationService);
+  layoutService = inject(LayoutService);
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',

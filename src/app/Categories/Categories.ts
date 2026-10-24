@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { TransactionService, CategoryItem } from '../Services/transaction.service';
 import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
 import { NotificationService } from '../Services/notification.service';
+import { LayoutService } from '../Services/layout.service';
 
 @Component({
   selector: 'app-categories',
@@ -16,6 +17,7 @@ import { NotificationService } from '../Services/notification.service';
 export class Categories implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
   notifService = inject(NotificationService);
+  layoutService = inject(LayoutService);
   private sub = new Subscription();
 
   searchQuery = '';

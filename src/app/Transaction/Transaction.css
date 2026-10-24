@@ -449,3 +449,89 @@ body.dark-mode .pagination-controls .pager-btn:disabled {
   opacity: 0.35 !important;
   cursor: not-allowed;
 }
+
+/* ========================================================
+   RESPONSIVE DESIGN (TABLETS & MOBILES)
+   ======================================================== */
+@media (max-width: 1023px) {
+  .transactions-viewport {
+    padding: 16px 18px 36px;
+  }
+
+  .filters-card {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .filter-search-input {
+    min-width: 100%;
+    flex: 1 1 100%;
+  }
+
+  .filter-select-box {
+    flex: 1 1 calc(50% - 6px);
+    min-width: 130px;
+  }
+
+  .table-card {
+    padding: 14px 14px;
+  }
+
+  .table-frame {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .transactions-data-table {
+    min-width: 680px;
+  }
+
+  .pagination-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .transactions-viewport {
+    padding: 12px 14px 28px;
+  }
+
+  .top-nav-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .search-global-box {
+    order: 3;
+    width: 100%;
+  }
+
+  .nav-right-actions {
+    margin-left: auto;
+  }
+
+  .btn-top-add {
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .filter-select-box {
+    flex: 1 1 100%;
+  }
+
+  .page-title-section {
+    margin-bottom: 14px;
+  }
+
+  .page-heading {
+    font-size: 20px;
+  }
+
+  .transactions-data-table {
+    min-width: 620px;
+  }
+}

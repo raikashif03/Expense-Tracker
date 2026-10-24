@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { TransactionService, TransactionItem } from '../Services/transaction.service';
 import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
 import { NotificationService } from '../Services/notification.service';
+import { LayoutService } from '../Services/layout.service';
 
 export interface MonthlyCashFlow {
   month: string;
@@ -33,6 +34,7 @@ export interface TrendPoint {
 export class Analytics implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
   notifService = inject(NotificationService);
+  layoutService = inject(LayoutService);
   private sub = new Subscription();
 
   user = {

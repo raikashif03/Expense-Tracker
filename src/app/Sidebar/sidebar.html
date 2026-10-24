@@ -2,16 +2,21 @@
 
   <!-- Top Section: Brand & Primary Action -->
   <div class="sidebar-top">
-    <!-- Brand Logo -->
-    <a routerLink="/dashboard" class="brand-header brand-header-link" title="FinTrack Dashboard">
-      <div class="brand-logo-icon">
-        <span class="material-symbols-outlined logo-icon">account_balance</span>
-      </div>
-      <div class="brand-text-block">
-        <span class="brand-title">FinTrack</span>
-        <span class="brand-tagline">WEALTH MANAGEMENT</span>
-      </div>
-    </a>
+    <!-- Brand Logo Row with Mobile Close Button -->
+    <div class="brand-row">
+      <a routerLink="/dashboard" (click)="closeSidebar()" class="brand-header brand-header-link" title="FinTrack Dashboard">
+        <div class="brand-logo-icon">
+          <span class="material-symbols-outlined logo-icon">account_balance</span>
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-title">FinTrack</span>
+          <span class="brand-tagline">WEALTH MANAGEMENT</span>
+        </div>
+      </a>
+      <button type="button" class="mobile-close-btn" (click)="closeSidebar()" aria-label="Close Sidebar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
 
     <!-- Add Transaction Primary Button -->
     <button type="button" class="btn-sidebar-add" (click)="openAddModal()">
@@ -22,32 +27,32 @@
 
   <!-- Middle Navigation Links -->
   <nav class="sidebar-nav">
-    <a routerLink="/dashboard" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/dashboard" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">dashboard</span>
       <span>Dashboard</span>
     </a>
 
-    <a routerLink="/transactions" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/transactions" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">receipt_long</span>
       <span>Transactions</span>
     </a>
 
-    <a routerLink="/analytics" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/analytics" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">analytics</span>
       <span>Analytics</span>
     </a>
 
-    <a routerLink="/budgets" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/budgets" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">account_balance_wallet</span>
       <span>Budgets</span>
     </a>
 
-    <a routerLink="/categories" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/categories" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">category</span>
       <span>Categories</span>
     </a>
 
-    <a routerLink="/settings" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/settings" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">settings</span>
       <span>Settings</span>
     </a>
@@ -57,7 +62,7 @@
   <div class="sidebar-footer">
     <div class="divider-line"></div>
 
-    <a routerLink="/settings" routerLinkActive="active-nav-link" class="nav-item">
+    <a routerLink="/settings" (click)="closeSidebar()" routerLinkActive="active-nav-link" class="nav-item">
       <span class="material-symbols-outlined nav-icon">account_circle</span>
       <span>Profile</span>
     </a>

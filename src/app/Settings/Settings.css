@@ -471,3 +471,72 @@
 .btn-save-settings:hover {
   background-color: #241ea8;
 }
+
+/* ========================================================
+   RESPONSIVE DESIGN (TABLETS & MOBILES)
+   ======================================================== */
+@media (max-width: 1023px) {
+  .settings-viewport {
+    padding: 16px 18px 36px;
+  }
+
+  .settings-card {
+    padding: 18px 20px;
+  }
+
+  .search-global-box {
+    width: 280px;
+  }
+}
+
+@media (max-width: 640px) {
+  .settings-viewport {
+    padding: 12px 14px 28px;
+  }
+
+  .top-nav-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .search-global-box {
+    order: 3;
+    width: 100%;
+  }
+
+  .nav-right-actions {
+    margin-left: auto;
+  }
+
+  .profile-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .profile-fields-col {
+    width: 100%;
+  }
+
+  .form-row-duo {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .settings-card {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+
+  .settings-actions-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-cancel-settings,
+  .btn-save-settings {
+    width: 100%;
+    justify-content: center;
+  }
+}
