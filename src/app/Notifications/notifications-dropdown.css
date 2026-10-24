@@ -5,9 +5,11 @@
   right: 0;
   margin-top: 10px;
   z-index: 1000;
+  pointer-events: none;
 }
 
 .notif-dropdown-wrapper {
+  pointer-events: auto;
   width: 360px;
   max-width: 90vw;
   background: #ffffff;
@@ -306,12 +308,23 @@ body.dark-mode .notif-footer {
   border-top-color: #1e293b !important;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   :host {
-    right: -50px;
+    position: fixed !important;
+    top: 56px !important;
+    left: 12px !important;
+    right: 12px !important;
+    margin: 0 !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    justify-content: center !important;
+    pointer-events: none !important;
   }
+
   .notif-dropdown-wrapper {
-    width: 310px;
-    max-width: calc(100vw - 28px);
+    width: 100% !important;
+    max-width: 420px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
+    pointer-events: auto !important;
   }
 }
