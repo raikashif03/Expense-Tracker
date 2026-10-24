@@ -8,9 +8,13 @@
     </div>
 
     <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button" aria-label="Notifications">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
       <button class="icon-circle-btn" type="button" aria-label="Calendar">
         <span class="material-symbols-outlined">calendar_today</span>
       </button>

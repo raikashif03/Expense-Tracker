@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TransactionService, CategoryItem } from '../services/transaction.service';
+import { TransactionService, CategoryItem } from '../Services/transaction.service';
 
 @Component({
   selector: 'app-add-transaction',

@@ -1,11 +1,19 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { routes } from './app.routes';
 import { App } from './app';
+import { Dashboard } from './Dashboard/Dashboard';
 
-describe('App', () => {
+describe('App & Router Navigation', () => {
+  let router: Router;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, Dashboard],
+      providers: [provideRouter(routes)]
     }).compileComponents();
+
+    router = TestBed.inject(Router);
   });
 
   it('should create the app', () => {
@@ -14,10 +22,26 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it('should navigate to dashboard and render without error', async () => {
     const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await router.navigate(['/dashboard']);
+    fixture.detectChanges();
     await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, expense-tracker');
+    expect(router.url).toBe('/dashboard');
+  });
+
+  it('should navigate to all routes without error', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+
+    for (const path of ['/transactions', '/analytics', '/budgets', '/categories', '/settings', '/dashboard']) {
+      await router.navigate([path]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(router.url).toBe(path);
+    }
   });
 });
+
+

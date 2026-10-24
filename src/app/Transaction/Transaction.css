@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 
 .transactions-viewport {
-  width: 100%; height: 100vh; max-height: 100vh; overflow-y: auto;
+  width: 100%; min-height: 100%; height: auto; overflow: visible;
   padding: 16px 36px 24px; background-color: #f8fafc; color: #1e293b;
   display: flex; flex-direction: column;
 }
@@ -85,6 +85,69 @@
   cursor: pointer; appearance: none;
 }
 .select-arrow { position: absolute; right: 8px; pointer-events: none; font-size: 18px; color: #64748b; }
+
+/* Bulk Actions Bar */
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ede9fe;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  animation: fadeIn 0.2s ease;
+}
+
+.bulk-count-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+.bulk-icon {
+  font-size: 18px;
+  color: #4f46e5;
+}
+
+.btn-bulk-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-bulk-delete:hover {
+  background-color: #dc2626;
+}
+
+.btn-bulk-delete .material-symbols-outlined {
+  font-size: 16px;
+}
+
+body.dark-mode .bulk-actions-bar {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+  border-color: #3730a3 !important;
+}
+
+body.dark-mode .bulk-count-text {
+  color: #c7d2fe !important;
+}
+
+body.dark-mode .bulk-icon {
+  color: #818cf8 !important;
+}
 
 .table-card {
   background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;

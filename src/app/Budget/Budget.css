@@ -4,9 +4,9 @@
 
 .budgets-viewport {
   width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
   height: auto;
-  overflow-y: auto;
+  overflow: visible;
   padding: 16px 36px 40px;
   background-color: #f8fafc;
   color: #1e293b;

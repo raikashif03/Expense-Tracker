@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { Sidebar } from './Sidebar/sidebar';
-import { AddTransaction } from './add_transaction/Add_transaction'; // Capital 'A' to match your file
+import { AddTransaction } from './Add_transaction/Add_transaction';
 
 @Component({
   selector: 'app-root',
@@ -11,4 +12,24 @@ import { AddTransaction } from './add_transaction/Add_transaction'; // Capital '
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {}
+export class App implements OnInit, OnDestroy {
+  private router = inject(Router);
+  private sub = new Subscription();
+
+  ngOnInit(): void {
+    this.sub.add(
+      this.router.events.pipe(
+        filter((e): e is NavigationEnd => e instanceof NavigationEnd)
+      ).subscribe(() => {
+        const content = document.querySelector('.app-content');
+        if (content) {
+          content.scrollTop = 0;
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+}

@@ -2,16 +2,23 @@
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search..." />
+      <input type="text" placeholder="Search analytics by category..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+      <button *ngIf="searchQuery" type="button" class="search-clear-btn" (click)="clearSearch()" title="Clear search">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
 
     <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+      <button class="icon-circle-btn" type="button" aria-label="Calendar" title="Calendar">
         <span class="material-symbols-outlined">calendar_today</span>
       </button>
-      <button class="icon-circle-btn" type="button" aria-label="Notifications">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
       <button class="btn-top-add" type="button" (click)="openAddModal()">
         <span class="material-symbols-outlined">add</span>
         Add Transaction
@@ -24,7 +31,7 @@
 
   <div class="page-title-section">
     <h1 class="page-heading">Analytics</h1>
-    <p class="page-subheading">Understand where your money goes based on live records.</p>
+    <p class="page-subheading">Comprehensive breakdown of your income, expenses, and capital trends.</p>
   </div>
 
   <section class="kpi-grid">
@@ -34,7 +41,7 @@
         <div class="kpi-icon-pill icon-pink"><span class="material-symbols-outlined">show_chart</span></div>
       </div>
       <div class="kpi-val">{{ currency }}{{ totalSpent | number:'1.2-2' }}</div>
-      <div class="kpi-trend text-muted">From {{ transactions.length }} total transactions</div>
+      <div class="kpi-trend text-muted">Across {{ transactions.length }} total recorded transactions</div>
     </div>
 
     <div class="kpi-card">
@@ -44,7 +51,7 @@
       </div>
       <div class="kpi-val">{{ largestExpense.name }}</div>
       <div class="kpi-trend text-muted" *ngIf="totalSpent > 0">
-        {{ currency }}{{ largestExpense.amount | number:'1.2-2' }} ({{ largestExpense.percentage }}% of total)
+        {{ currency }}{{ largestExpense.amount | number:'1.2-2' }} ({{ largestExpense.percentage }}% of all expenses)
       </div>
       <div class="kpi-trend text-muted" *ngIf="totalSpent === 0">No expenses recorded</div>
     </div>
@@ -56,7 +63,7 @@
       </div>
       <div class="kpi-val text-white">{{ savingsRate }}%</div>
       <div class="kpi-trend text-purple-lighter">
-        {{ totalIncome >= totalSpent ? 'Positive net flow' : 'Expenses exceed income' }}
+        {{ totalIncome >= totalSpent ? 'Positive net flow surplus' : 'Expenses exceed total income' }}
       </div>
     </div>
   </section>
@@ -64,11 +71,20 @@
   <section class="charts-grid">
     <div class="panel-card">
       <div class="panel-header">
-        <h2 class="panel-title">Spending Trend</h2>
-        <div class="time-pills">
-          <button type="button" class="pill-btn" [class.active]="timeframe === 'Daily'" (click)="timeframe = 'Daily'">Daily</button>
-          <button type="button" class="pill-btn" [class.active]="timeframe === 'Weekly'" (click)="timeframe = 'Weekly'">Weekly</button>
-          <button type="button" class="pill-btn" [class.active]="timeframe === 'Monthly'" (click)="timeframe = 'Monthly'">Monthly</button>
+        <div>
+          <h2 class="panel-title">Spending Trend</h2>
+          <span class="panel-subtitle-small">Dynamic timeline tracking</span>
+        </div>
+        <div class="header-right-actions">
+          <div class="active-val-pill" *ngIf="activeTrendPoint">
+            {{ activeTrendPoint.label }}<span *ngIf="activeTrendPoint.subLabel"> ({{ activeTrendPoint.subLabel }})</span>:
+            <strong>{{ currency }}{{ activeTrendPoint.amount | number:'1.2-2' }}</strong>
+          </div>
+          <div class="time-pills">
+            <button type="button" class="pill-btn" [class.active]="timeframe === 'Daily'" (click)="setTimeframe('Daily')">Daily</button>
+            <button type="button" class="pill-btn" [class.active]="timeframe === 'Weekly'" (click)="setTimeframe('Weekly')">Weekly</button>
+            <button type="button" class="pill-btn" [class.active]="timeframe === 'Monthly'" (click)="setTimeframe('Monthly')">Monthly</button>
+          </div>
         </div>
       </div>
 
@@ -78,19 +94,52 @@
         </div>
 
         <div class="trend-chart-container">
-          <svg class="trend-svg" viewBox="0 0 560 170" preserveAspectRatio="none">
+          <svg class="trend-svg" viewBox="0 0 560 160" preserveAspectRatio="none">
             <defs>
               <linearGradient id="trendGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.18" />
+                <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.30" />
+                <stop offset="60%" stop-color="#4f46e5" stop-opacity="0.08" />
                 <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.0" />
               </linearGradient>
             </defs>
+
+            <!-- Grid horizontal lines -->
+            <line x1="0" y1="35" x2="560" y2="35" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+            <line x1="0" y1="70" x2="560" y2="70" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+            <line x1="0" y1="105" x2="560" y2="105" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+            <line x1="0" y1="135" x2="560" y2="135" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+
             <path [attr.d]="chartAreaPath" fill="url(#trendGrad)" />
-            <path [attr.d]="chartPath" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" />
+            <path [attr.d]="chartPath" fill="none" stroke="#4f46e5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Point markers -->
+            <g *ngFor="let pt of trendPoints">
+              <circle
+                [attr.cx]="pt.x"
+                [attr.cy]="pt.y"
+                r="5.5"
+                fill="#ffffff"
+                stroke="#4f46e5"
+                stroke-width="3"
+                class="analytics-chart-dot"
+                (mouseenter)="setActiveTrendPoint(pt)"
+                (mouseleave)="setActiveTrendPoint(null)"
+              >
+                <title>{{ pt.label }}: {{ currency }}{{ pt.amount | number:'1.2-2' }}</title>
+              </circle>
+            </g>
           </svg>
 
           <div class="x-axis-ticks">
-            <span *ngFor="let w of trendWeeks">{{ w }}</span>
+            <span 
+              *ngFor="let pt of trendPoints"
+              class="tick-label"
+              [class.highlight]="activeTrendPoint?.label === pt.label"
+              (mouseenter)="setActiveTrendPoint(pt)"
+              (mouseleave)="setActiveTrendPoint(null)"
+            >
+              {{ pt.label }}
+            </span>
           </div>
         </div>
       </div>
@@ -104,7 +153,7 @@
       <div class="donut-area">
         <div class="donut-ring" [style.background]="donutGradient">
           <div class="donut-inner-cutout">
-            <span class="donut-label">Total</span>
+            <span class="donut-label">Total Outflow</span>
             <span class="donut-val">{{ currency }}{{ totalSpent | number:'1.0-0' }}</span>
           </div>
         </div>
@@ -116,7 +165,10 @@
             <span class="dot" [style.background-color]="cat.color"></span>
             <span class="legend-name">{{ cat.name }}</span>
           </div>
-          <span class="legend-pct">{{ cat.percentage }}%</span>
+          <div class="legend-values">
+            <span class="cat-sum-text">{{ currency }}{{ cat.amount | number:'1.0-0' }}</span>
+            <span class="legend-pct">{{ cat.percentage }}%</span>
+          </div>
         </div>
         <div class="empty-state-text" *ngIf="categoryBreakdown.length === 0">
           No categories recorded yet
@@ -128,11 +180,20 @@
   <section class="bottom-grid">
     <div class="panel-card">
       <div class="panel-header">
-        <h2 class="panel-title">Cash Flow</h2>
+        <div>
+          <h2 class="panel-title">Cash Flow</h2>
+          <span class="panel-subtitle-small">Last 6 months comparison</span>
+        </div>
         <div class="legend-inline">
           <div class="legend-pill"><span class="dot dot-green"></span> Income</div>
           <div class="legend-pill"><span class="dot dot-blue"></span> Expense</div>
         </div>
+      </div>
+
+      <div class="cashflow-info-bar" *ngIf="activeCashFlowMonth">
+        <span>{{ activeCashFlowMonth.month }} {{ activeCashFlowMonth.year }}:</span>
+        <span class="text-green">Income: {{ currency }}{{ activeCashFlowMonth.income | number:'1.2-2' }}</span>
+        <span class="text-blue">Expense: {{ currency }}{{ activeCashFlowMonth.expense | number:'1.2-2' }}</span>
       </div>
 
       <div class="cashflow-layout">
@@ -141,10 +202,23 @@
         </div>
 
         <div class="cashflow-bars-area">
-          <div class="month-bar-group" *ngFor="let col of cashFlowMonths">
+          <div 
+            class="month-bar-group" 
+            *ngFor="let col of cashFlowMonths"
+            (mouseenter)="setActiveCashFlow(col)"
+            (mouseleave)="setActiveCashFlow(null)"
+          >
             <div class="bars-pair">
-              <div class="bar-fill bar-green" [style.height.%]="col.incomeHeightPct"></div>
-              <div class="bar-fill bar-blue" [style.height.%]="col.expenseHeightPct"></div>
+              <div 
+                class="bar-fill bar-green" 
+                [style.height.%]="col.incomeHeightPct"
+                [title]="col.month + ' Income: ' + currency + (col.income | number:'1.2-2')"
+              ></div>
+              <div 
+                class="bar-fill bar-blue" 
+                [style.height.%]="col.expenseHeightPct"
+                [title]="col.month + ' Expense: ' + currency + (col.expense | number:'1.2-2')"
+              ></div>
             </div>
             <span class="month-label">{{ col.month }}</span>
           </div>
@@ -154,15 +228,14 @@
 
     <div class="panel-card top-cat-card">
       <div class="panel-header">
-        <h2 class="panel-title">Top Categories</h2>
-        <span class="view-all-text">View All</span>
+        <h2 class="panel-title">Top Expense Categories</h2>
       </div>
 
       <div class="progress-list" *ngIf="categoryBreakdown.length > 0">
         <div class="progress-row" *ngFor="let cat of categoryBreakdown">
           <div class="progress-labels">
             <span class="category-name">{{ cat.name }}</span>
-            <span class="category-sum">{{ currency }}{{ cat.amount | number:'1.2-2' }}</span>
+            <span class="category-sum">{{ currency }}{{ cat.amount | number:'1.2-2' }} ({{ cat.percentage }}%)</span>
           </div>
           <div class="track-line">
             <div class="fill-line" [style.background-color]="cat.color" [style.width.%]="cat.percentage"></div>

@@ -1,19 +1,12 @@
 .app-layout {
-  min-height: 100vh;
   display: flex;
+  width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background-color: #f8fafc;
 }
 
-.main-content {
-  flex: 1;
-  padding: 30px;
-}
-
-.main-content h1 {
-  font-size: 28px;
-  margin-bottom: 8px;
-}
-
-.main-content p {
-  color: #64748b;
+body.dark-mode .app-layout {
+  background-color: #0b1120 !important;
 }

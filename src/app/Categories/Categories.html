@@ -2,10 +2,19 @@
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search..." />
+      <input type="text" placeholder="Search categories..." [(ngModel)]="searchQuery" />
+      <button *ngIf="searchQuery" type="button" class="search-clear-btn" (click)="searchQuery = ''" title="Clear search">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
     <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button"><span class="material-symbols-outlined">notifications</span></button>
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
       <div class="user-avatar-circle"><span class="material-symbols-outlined user-icon">account_circle</span></div>
     </div>
   </header>
@@ -22,7 +31,7 @@
   </div>
 
   <section class="categories-grid">
-    <div class="category-card" *ngFor="let cat of categories">
+    <div class="category-card" *ngFor="let cat of filteredCategories">
       <div class="card-top-row">
         <div class="cat-icon-container" [style.background]="cat.iconBg" [style.color]="cat.iconColor">
           <span class="material-symbols-outlined">{{ cat.icon }}</span>
@@ -43,6 +52,10 @@
       <div class="cat-amount" [ngClass]="cat.type === 'earned' ? 'earned-text' : 'spent-text'">
         {{ currency }}{{ cat.spentAmount | number:'1.2-2' }} {{ cat.type }}
       </div>
+    </div>
+    <div class="empty-notice" *ngIf="filteredCategories.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: #94a3b8;">
+      <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 8px; display: block; color: #64748b;">search_off</span>
+      <p style="font-size: 15px; margin-bottom: 6px; color: #cbd5e1; font-weight: 600;">No categories match "{{ searchQuery }}"</p>
     </div>
   </section>
 </main>

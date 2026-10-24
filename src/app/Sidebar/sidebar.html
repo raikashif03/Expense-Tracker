@@ -3,7 +3,7 @@
   <!-- Top Section: Brand & Primary Action -->
   <div class="sidebar-top">
     <!-- Brand Logo -->
-    <div class="brand-header">
+    <a routerLink="/dashboard" class="brand-header brand-header-link" title="FinTrack Dashboard">
       <div class="brand-logo-icon">
         <span class="material-symbols-outlined logo-icon">account_balance</span>
       </div>
@@ -11,7 +11,7 @@
         <span class="brand-title">FinTrack</span>
         <span class="brand-tagline">WEALTH MANAGEMENT</span>
       </div>
-    </div>
+    </a>
 
     <!-- Add Transaction Primary Button -->
     <button type="button" class="btn-sidebar-add" (click)="openAddModal()">

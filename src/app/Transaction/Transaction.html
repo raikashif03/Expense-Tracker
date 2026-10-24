@@ -6,10 +6,14 @@
     </div>
 
     <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button" aria-label="Notifications">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
-      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
+      <button class="icon-circle-btn" type="button" aria-label="Calendar" title="Calendar">
         <span class="material-symbols-outlined">calendar_today</span>
       </button>
       <button class="btn-top-add" type="button" (click)="openAddModal()">
@@ -45,7 +49,7 @@
     <section class="filters-card">
       <div class="filter-search-input">
         <span class="material-symbols-outlined search-icon">search</span>
-        <input type="text" placeholder="Search..." [(ngModel)]="searchQuery" />
+        <input type="text" placeholder="Search by name or method..." [(ngModel)]="searchQuery" />
       </div>
 
       <div class="filter-select-box">
@@ -67,8 +71,10 @@
 
       <div class="filter-select-box">
         <select [(ngModel)]="selectedPeriod">
-          <option value="This Month">This Month</option>
           <option value="All Time">All Time</option>
+          <option value="This Month">This Month</option>
+          <option value="Last Month">Last Month</option>
+          <option value="This Year">This Year</option>
         </select>
         <span class="material-symbols-outlined select-arrow">calendar_month</span>
       </div>
@@ -77,10 +83,24 @@
         <select [(ngModel)]="sortOrder">
           <option value="Newest First">Newest First</option>
           <option value="Oldest First">Oldest First</option>
+          <option value="Highest Amount">Highest Amount</option>
+          <option value="Lowest Amount">Lowest Amount</option>
         </select>
         <span class="material-symbols-outlined select-arrow">sort</span>
       </div>
     </section>
+
+    <!-- Bulk Action Bar -->
+    <div class="bulk-actions-bar" *ngIf="selectedCount > 0">
+      <span class="bulk-count-text">
+        <span class="material-symbols-outlined bulk-icon">check_circle</span>
+        <strong>{{ selectedCount }}</strong> transaction(s) selected
+      </span>
+      <button type="button" class="btn-bulk-delete" (click)="deleteSelected()">
+        <span class="material-symbols-outlined">delete</span>
+        <span>Delete Selected</span>
+      </button>
+    </div>
 
     <section class="table-card">
       <div class="table-frame">
@@ -88,7 +108,7 @@
           <thead>
             <tr>
               <th class="col-checkbox">
-                <input type="checkbox" (change)="toggleSelectAll($event)" />
+                <input type="checkbox" [checked]="isAllSelected" (change)="toggleSelectAll($event)" />
               </th>
               <th>TRANSACTION</th>
               <th>CATEGORY</th>
@@ -129,6 +149,11 @@
                 <button class="row-delete-btn" type="button" (click)="deleteItem(item.id)" title="Delete transaction">
                   <span class="material-symbols-outlined">delete</span>
                 </button>
+              </td>
+            </tr>
+            <tr *ngIf="paginatedTransactions.length === 0">
+              <td colspan="8" style="text-align: center; padding: 40px; color: #94a3b8;">
+                No transactions match your current filters.
               </td>
             </tr>
           </tbody>

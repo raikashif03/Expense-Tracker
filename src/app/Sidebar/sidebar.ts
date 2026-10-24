@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { TransactionService } from '../services/transaction.service';
-import { ThemeService } from '../services/theme.service';
+import { TransactionService } from '../Services/transaction.service';
+import { ThemeService } from '../Services/theme.service';
 
 @Component({
   selector: 'app-sidebar',

@@ -2,21 +2,31 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TransactionService, CategoryItem } from '../services/transaction.service';
+import { TransactionService, CategoryItem } from '../Services/transaction.service';
+import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
+import { NotificationService } from '../Services/notification.service';
 
 @Component({
   selector: 'app-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NotificationsDropdown],
   templateUrl: './Categories.html',
   styleUrl: './Categories.css'
 })
 export class Categories implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
+  notifService = inject(NotificationService);
   private sub = new Subscription();
 
+  searchQuery = '';
   categories: CategoryItem[] = [];
   currency = '€';
+
+  get filteredCategories(): CategoryItem[] {
+    if (!this.searchQuery.trim()) return this.categories;
+    const q = this.searchQuery.toLowerCase().trim();
+    return this.categories.filter(c => c.name.toLowerCase().includes(q));
+  }
 
   isDeleteModalOpen = false;
   categoryToDelete: CategoryItem | null = null;

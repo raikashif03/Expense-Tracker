@@ -1,20 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TransactionService } from '../services/transaction.service';
-import { ThemeService } from '../services/theme.service';
+import { TransactionService } from '../Services/transaction.service';
+import { ThemeService } from '../Services/theme.service';
+import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
+import { NotificationService } from '../Services/notification.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NotificationsDropdown],
   templateUrl: './Settings.html',
   styleUrl: './Settings.css'
 })
 export class Settings implements OnInit {
   private readonly STORAGE_KEY = 'fintrack_user_settings_v1';
   private txService = inject(TransactionService);
-  private themeService = inject(ThemeService);
+  themeService = inject(ThemeService);
+  notifService = inject(NotificationService);
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
@@ -40,6 +43,7 @@ export class Settings implements OnInit {
 
   ngOnInit(): void {
     this.loadSettings();
+    this.preferences.theme = this.themeService.isDark ? 'Dark' : 'Light';
   }
 
   loadSettings(): void {
@@ -64,11 +68,7 @@ export class Settings implements OnInit {
 
   setTheme(mode: string): void {
     this.preferences.theme = mode;
-    if (mode === 'Dark') {
-      document.body.classList.add('dark-mode');
-    } else if (mode === 'Light') {
-      document.body.classList.remove('dark-mode');
-    }
+    this.themeService.setDarkMode(mode === 'Dark');
   }
 
   saveSettings(): void {
@@ -79,6 +79,7 @@ export class Settings implements OnInit {
     };
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
 
+    this.themeService.setDarkMode(this.preferences.theme === 'Dark');
     this.txService.setCurrency(this.preferences.currency);
     this.txService.setDateFormat(this.preferences.dateFormat);
 
@@ -90,6 +91,7 @@ export class Settings implements OnInit {
 
   cancelSettings(): void {
     this.loadSettings();
+    this.preferences.theme = this.themeService.isDark ? 'Dark' : 'Light';
     this.txService.setCurrency(this.preferences.currency);
     this.txService.setDateFormat(this.preferences.dateFormat);
   }

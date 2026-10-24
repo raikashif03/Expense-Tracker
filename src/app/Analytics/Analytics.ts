@@ -1,48 +1,65 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { TransactionService, TransactionItem } from '../services/transaction.service';
+import { TransactionService, TransactionItem } from '../Services/transaction.service';
+import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
+import { NotificationService } from '../Services/notification.service';
 
 export interface MonthlyCashFlow {
   month: string;
+  year: number;
   income: number;
   expense: number;
   incomeHeightPct: number;
   expenseHeightPct: number;
 }
 
+export interface TrendPoint {
+  x: number;
+  y: number;
+  label: string;
+  subLabel?: string;
+  amount: number;
+}
+
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, NotificationsDropdown],
   templateUrl: './Analytics.html',
   styleUrl: './Analytics.css'
 })
 export class Analytics implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
+  notifService = inject(NotificationService);
   private sub = new Subscription();
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
   };
 
+  searchQuery = '';
   timeframe: 'Daily' | 'Weekly' | 'Monthly' = 'Weekly';
   totalSpent = 0;
   totalIncome = 0;
   savingsRate = 0;
   largestExpense = { name: 'None', amount: 0, percentage: 0 };
   categoryBreakdown: { name: string; amount: number; percentage: number; color: string }[] = [];
-  donutGradient = '#e2e8f0';
+  donutGradient = 'var(--donut-empty-track, #e2e8f0)';
   transactions: TransactionItem[] = [];
   currency = '€';
 
   chartPath = '';
   chartAreaPath = '';
-  trendWeeks: string[] = ['W1', 'W2', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W9', 'W10', 'W11', 'W12'];
-  yTrendLabels: number[] = [3500, 3000, 2500, 2000, 1500, 1000, 500, 0];
+  trendXLabels: string[] = [];
+  trendPoints: TrendPoint[] = [];
+  yTrendLabels: number[] = [1000, 800, 600, 400, 200, 0];
+  activeTrendPoint: TrendPoint | null = null;
 
   cashFlowMonths: MonthlyCashFlow[] = [];
-  yCashFlowLabels: number[] = [10000, 8000, 6000, 4000, 2000, 0];
+  yCashFlowLabels: number[] = [5000, 4000, 3000, 2000, 1000, 0];
+  activeCashFlowMonth: MonthlyCashFlow | null = null;
 
   ngOnInit(): void {
     this.sub.add(
@@ -64,12 +81,63 @@ export class Analytics implements OnInit, OnDestroy {
     this.txService.openModal();
   }
 
+  onSearchChange(): void {
+    this.calculateAnalytics();
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.calculateAnalytics();
+  }
+
+  setTimeframe(tf: 'Daily' | 'Weekly' | 'Monthly'): void {
+    this.timeframe = tf;
+    this.buildTrendLine();
+  }
+
+  setActiveTrendPoint(pt: TrendPoint | null): void {
+    this.activeTrendPoint = pt;
+  }
+
+  setActiveCashFlow(month: MonthlyCashFlow | null): void {
+    this.activeCashFlowMonth = month;
+  }
+
   private calculateAnalytics(): void {
-    this.totalSpent = this.txService.getTotalExpense();
-    this.totalIncome = this.txService.getTotalIncome();
-    this.savingsRate = this.txService.getSavingsRate();
-    this.largestExpense = this.txService.getLargestExpense();
-    this.categoryBreakdown = this.txService.getCategoryBreakdown();
+    const q = this.searchQuery.toLowerCase().trim();
+    let allBreakdown = this.txService.getCategoryBreakdown();
+
+    if (q) {
+      allBreakdown = allBreakdown.filter(c => 
+        c.name.toLowerCase().includes(q) ||
+        this.transactions.some(t => t.category.toLowerCase().includes(q) && t.category === c.name)
+      );
+      this.categoryBreakdown = allBreakdown;
+      this.totalSpent = this.categoryBreakdown.reduce((s, c) => s + c.amount, 0);
+      this.totalIncome = this.transactions
+        .filter(t => t.amount > 0 && (t.name.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)))
+        .reduce((s, t) => s + t.amount, 0);
+
+      if (this.categoryBreakdown.length > 0) {
+        const top = this.categoryBreakdown[0];
+        this.largestExpense = {
+          name: top.name,
+          amount: top.amount,
+          percentage: this.totalSpent > 0 ? Math.round((top.amount / this.totalSpent) * 100) : 0
+        };
+      } else {
+        this.largestExpense = { name: 'None', amount: 0, percentage: 0 };
+      }
+      this.savingsRate = this.totalIncome > 0 
+        ? Math.max(0, Math.round(((this.totalIncome - this.totalSpent) / this.totalIncome) * 100))
+        : 0;
+    } else {
+      this.totalSpent = this.txService.getTotalExpense();
+      this.totalIncome = this.txService.getTotalIncome();
+      this.savingsRate = this.txService.getSavingsRate();
+      this.largestExpense = this.txService.getLargestExpense();
+      this.categoryBreakdown = allBreakdown;
+    }
 
     this.buildDonutGradient();
     this.buildTrendLine();
@@ -78,7 +146,7 @@ export class Analytics implements OnInit, OnDestroy {
 
   private buildDonutGradient(): void {
     if (this.categoryBreakdown.length === 0 || this.totalSpent === 0) {
-      this.donutGradient = '#f1f5f9';
+      this.donutGradient = 'var(--donut-empty-track, #e2e8f0)';
       return;
     }
 
@@ -92,23 +160,54 @@ export class Analytics implements OnInit, OnDestroy {
     });
 
     if (deg < 360) {
-      slices.push(`#e2e8f0 ${deg}deg 360deg`);
+      slices.push(`var(--donut-empty-track, #e2e8f0) ${deg}deg 360deg`);
     }
 
     this.donutGradient = `conic-gradient(${slices.join(', ')})`;
   }
 
   private buildTrendLine(): void {
-    const actualExpense = this.totalSpent;
-    const dynamicMax = actualExpense > 0 
-      ? Math.max(Math.ceil((actualExpense * 1.4) / 100) * 100, 200) 
-      : 3500;
+    const svgWidth = 560;
+    const svgHeight = 160;
+    const topPadding = 20;
+    const bottomPadding = 25;
+    const usableHeight = svgHeight - topPadding - bottomPadding;
 
-    const step = Math.round(dynamicMax / 7);
+    let rawData: { label: string; subLabel?: string; amount: number }[] = [];
+
+    if (this.timeframe === 'Daily') {
+      const dailySeries = this.txService.getDailySpendingSeries(7);
+      rawData = dailySeries.map(d => ({
+        label: d.label,
+        subLabel: d.date,
+        amount: d.amount
+      }));
+    } else if (this.timeframe === 'Weekly') {
+      const weeklySeries = this.txService.getWeeklySpendingSeries(8);
+      rawData = weeklySeries.map(w => ({
+        label: w.week,
+        subLabel: w.label,
+        amount: w.amount
+      }));
+    } else {
+      const monthlySeries = this.txService.getMonthlyCashFlowSeries(6);
+      rawData = monthlySeries.map(m => ({
+        label: m.month,
+        subLabel: `${m.year}`,
+        amount: m.expense
+      }));
+    }
+
+    this.trendXLabels = rawData.map(d => d.label);
+
+    const amounts = rawData.map(d => d.amount);
+    const maxVal = Math.max(...amounts, 20);
+    const stepUnit = maxVal > 1000 ? 500 : (maxVal > 200 ? 50 : 10);
+    const dynamicMax = Math.max(Math.ceil((maxVal * 1.2) / stepUnit) * stepUnit, 50);
+
+    const step = Math.round(dynamicMax / 5);
     this.yTrendLabels = [
       dynamicMax,
-      Math.round(step * 6),
-      Math.round(step * 5),
       Math.round(step * 4),
       Math.round(step * 3),
       Math.round(step * 2),
@@ -116,21 +215,27 @@ export class Analytics implements OnInit, OnDestroy {
       0
     ];
 
-    const waveMultipliers = [0.35, 0.55, 0.45, 0.62, 0.52, 0.82, 0.72, 0.92, 0.76, 0.58, 0.52, 0.74];
-    const dataPoints = waveMultipliers.map(m => dynamicMax * m);
-
-    const svgWidth = 560;
-    const svgHeight = 150;
-    const topPadding = 15;
-    const bottomPadding = 15;
-    const usableHeight = svgHeight - topPadding - bottomPadding;
-
-    const points = dataPoints.map((val, idx) => {
-      const x = (idx / (dataPoints.length - 1)) * svgWidth;
-      const ratio = Math.min(val / dynamicMax, 1);
+    const n = rawData.length;
+    const points: TrendPoint[] = rawData.map((item, idx) => {
+      const x = n > 1 ? (idx / (n - 1)) * (svgWidth - 60) + 30 : svgWidth / 2;
+      const ratio = Math.min(item.amount / dynamicMax, 1);
       const y = svgHeight - bottomPadding - (ratio * usableHeight);
-      return { x, y };
+      return {
+        x,
+        y,
+        label: item.label,
+        subLabel: item.subLabel,
+        amount: item.amount
+      };
     });
+
+    this.trendPoints = points;
+
+    if (points.length === 0) {
+      this.chartPath = '';
+      this.chartAreaPath = '';
+      return;
+    }
 
     let d = `M ${points[0].x} ${points[0].y}`;
     for (let i = 1; i < points.length; i++) {
@@ -141,52 +246,37 @@ export class Analytics implements OnInit, OnDestroy {
     }
 
     this.chartPath = d;
-    this.chartAreaPath = `${d} L ${points[points.length - 1].x} ${svgHeight} L ${points[0].x} ${svgHeight} Z`;
+    this.chartAreaPath = `${d} L ${points[points.length - 1].x} ${svgHeight - bottomPadding} L ${points[0].x} ${svgHeight - bottomPadding} Z`;
   }
 
   private buildCashFlow(): void {
-    const monthBuckets = new Map<string, { income: number; expense: number }>();
-
-    this.transactions.forEach(t => {
-      const d = new Date(t.date);
-      const mName = isNaN(d.getTime()) 
-        ? 'Dec' 
-        : d.toLocaleDateString('en-US', { month: 'short' });
-
-      if (!monthBuckets.has(mName)) {
-        monthBuckets.set(mName, { income: 0, expense: 0 });
-      }
-
-      const item = monthBuckets.get(mName)!;
-      if (t.amount > 0) item.income += t.amount;
-      else item.expense += Math.abs(t.amount);
-    });
-
-    if (monthBuckets.size === 0) {
-      monthBuckets.set('Dec', { income: this.totalIncome, expense: this.totalSpent });
-    }
+    const rawSeries = this.txService.getMonthlyCashFlowSeries(6);
 
     let highestVal = 0;
-    monthBuckets.forEach(val => {
+    rawSeries.forEach(val => {
       highestVal = Math.max(highestVal, val.income, val.expense);
     });
 
-    const ceiling = Math.max(Math.ceil((highestVal * 1.2) / 1000) * 1000, 1000);
+    const stepUnit = highestVal > 2000 ? 1000 : (highestVal > 500 ? 250 : 100);
+    const ceiling = Math.max(Math.ceil((highestVal * 1.15) / stepUnit) * stepUnit, 500);
+
+    const step = Math.round(ceiling / 5);
     this.yCashFlowLabels = [
       ceiling,
-      Math.round(ceiling * 0.8),
-      Math.round(ceiling * 0.6),
-      Math.round(ceiling * 0.4),
-      Math.round(ceiling * 0.2),
+      Math.round(step * 4),
+      Math.round(step * 3),
+      Math.round(step * 2),
+      Math.round(step * 1),
       0
     ];
 
-    this.cashFlowMonths = Array.from(monthBuckets.entries()).map(([month, stats]) => ({
-      month,
-      income: stats.income,
-      expense: stats.expense,
-      incomeHeightPct: Math.min(100, Math.round((stats.income / ceiling) * 100)),
-      expenseHeightPct: Math.min(100, Math.round((stats.expense / ceiling) * 100))
+    this.cashFlowMonths = rawSeries.map(s => ({
+      month: s.month,
+      year: s.year,
+      income: s.income,
+      expense: s.expense,
+      incomeHeightPct: Math.min(100, Math.max(2, Math.round((s.income / ceiling) * 100))),
+      expenseHeightPct: Math.min(100, Math.max(2, Math.round((s.expense / ceiling) * 100)))
     }));
   }
 }

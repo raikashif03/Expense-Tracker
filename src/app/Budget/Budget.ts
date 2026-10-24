@@ -2,7 +2,9 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription, combineLatest } from 'rxjs';
-import { TransactionService, BudgetItem, CategoryItem } from '../services/transaction.service';
+import { TransactionService, BudgetItem, CategoryItem } from '../Services/transaction.service';
+import { NotificationsDropdown } from '../Notifications/notifications-dropdown';
+import { NotificationService } from '../Services/notification.service';
 
 interface BudgetViewItem extends BudgetItem {
   spent: number;
@@ -15,19 +17,27 @@ interface BudgetViewItem extends BudgetItem {
 @Component({
   selector: 'app-budget',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NotificationsDropdown],
   templateUrl: './Budget.html',
   styleUrl: './Budget.css'
 })
 export class Budget implements OnInit, OnDestroy {
   private txService = inject(TransactionService);
+  notifService = inject(NotificationService);
   private sub = new Subscription();
 
   user = {
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'
   };
 
+  searchQuery = '';
   budgetsList: BudgetViewItem[] = [];
+
+  get filteredBudgets(): BudgetViewItem[] {
+    if (!this.searchQuery.trim()) return this.budgetsList;
+    const q = this.searchQuery.toLowerCase().trim();
+    return this.budgetsList.filter(b => b.category.toLowerCase().includes(q));
+  }
   categoriesList: CategoryItem[] = [];
   currency = '€';
 

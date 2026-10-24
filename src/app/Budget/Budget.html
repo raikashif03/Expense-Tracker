@@ -3,13 +3,20 @@
   <header class="top-nav-bar">
     <div class="search-global-box">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search..." />
+      <input type="text" placeholder="Search budgets by category..." [(ngModel)]="searchQuery" />
+      <button *ngIf="searchQuery" type="button" class="search-clear-btn" (click)="searchQuery = ''" title="Clear search">
+        <span class="material-symbols-outlined">close</span>
+      </button>
     </div>
 
     <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button" aria-label="Notifications">
-        <span class="material-symbols-outlined">notifications</span>
-      </button>
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
       <div class="user-avatar-ring">
         <img [src]="user.avatar" alt="Avatar" />
       </div>
@@ -30,7 +37,7 @@
 
   <!-- Budgets Grid -->
   <section class="budgets-grid">
-    <div class="budget-card" *ngFor="let item of budgetsList" [class.card-danger-border]="item.isExceeded">
+    <div class="budget-card" *ngFor="let item of filteredBudgets" [class.card-danger-border]="item.isExceeded">
       <div class="budget-card-header">
         <div class="category-meta">
           <div class="cat-icon-box" [ngClass]="'icon-' + item.iconTheme">
@@ -84,6 +91,13 @@
         <span class="material-symbols-outlined alert-icon">error</span>
         <span>Budget exceeded by {{ currency }}{{ -item.remaining | number:'1.0-0' }}.</span>
       </div>
+    </div>
+
+    <!-- Empty State when search matches nothing -->
+    <div class="empty-notice" *ngIf="filteredBudgets.length === 0 && budgetsList.length > 0" style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; color: #94a3b8;">
+      <span class="material-symbols-outlined" style="font-size: 40px; margin-bottom: 8px; display: block; color: #64748b;">search_off</span>
+      <p style="font-size: 15px; margin-bottom: 6px; color: #cbd5e1; font-weight: 600;">No budgets match "{{ searchQuery }}"</p>
+      <p style="font-size: 13px;">Try searching for another category or clear the search query.</p>
     </div>
 
     <!-- Empty State when no budgets are configured -->

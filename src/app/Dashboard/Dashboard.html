@@ -1,12 +1,22 @@
 <main class="dashboard-viewport">
 
   <header class="top-nav-bar">
-    <div class="empty-header-space"></div>
-    <div class="nav-right-actions">
-      <button class="icon-circle-btn" type="button" aria-label="Notifications">
-        <span class="material-symbols-outlined">notifications</span>
+    <div class="search-global-box">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search transactions, categories..." [(ngModel)]="searchQuery" />
+      <button *ngIf="searchQuery" type="button" class="search-clear-btn" (click)="clearSearch()" title="Clear search">
+        <span class="material-symbols-outlined">close</span>
       </button>
-      <button class="icon-circle-btn" type="button" aria-label="Calendar">
+    </div>
+    <div class="nav-right-actions">
+      <div class="notif-anchor-wrap">
+        <button class="icon-circle-btn notif-trigger-btn notif-btn" type="button" aria-label="Notifications" title="Notifications" (click)="notifService.toggle()">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="notif-badge" *ngIf="(notifService.unreadCount$ | async) as count">{{ count }}</span>
+        </button>
+        <app-notifications-dropdown></app-notifications-dropdown>
+      </div>
+      <button class="icon-circle-btn" type="button" aria-label="Calendar" title="Calendar">
         <span class="material-symbols-outlined">calendar_today</span>
       </button>
       <div class="user-avatar-ring">
@@ -17,14 +27,14 @@
 
   <section class="welcome-section">
     <h1 class="welcome-heading">Good morning, {{ userName }}</h1>
-    <p class="welcome-subtext">Here's your financial overview for {{ currentMonth }}.</p>
+    <p class="welcome-subtext">Here's your live financial overview for {{ currentMonth }}.</p>
   </section>
 
   <!-- 4 Summary KPI Cards -->
   <section class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-header">
-        <span class="kpi-title">TOTAL BALANCE</span>
+        <span class="kpi-title">NET BALANCE</span>
         <div class="kpi-icon-box icon-purple">
           <span class="material-symbols-outlined">account_balance</span>
         </div>
@@ -32,7 +42,7 @@
       <div class="kpi-value">{{ totalBalance < 0 ? '-' : '' }}{{ currency }}{{ getAbs(totalBalance) | number:'1.2-2' }}</div>
       <div class="kpi-trend" [ngClass]="totalBalance >= 0 ? 'text-green' : 'text-danger'">
         <span class="material-symbols-outlined trend-arrow">{{ totalBalance >= 0 ? 'arrow_upward' : 'arrow_downward' }}</span>
-        <span>{{ totalBalance >= 0 ? '+' : '-' }}{{ currency }}{{ getAbs(savingsAmount) | number:'1.2-2' }} this month</span>
+        <span>{{ totalBalance >= 0 ? '+' : '-' }}{{ currency }}{{ getAbs(savingsAmount) | number:'1.2-2' }} net cashflow</span>
       </div>
     </div>
 
@@ -46,7 +56,7 @@
       <div class="kpi-value">{{ currency }}{{ monthlyIncome | number:'1.2-2' }}</div>
       <div class="kpi-trend text-green">
         <span class="material-symbols-outlined trend-arrow">trending_up</span>
-        <span>Total Received</span>
+        <span>Total Inflow</span>
       </div>
     </div>
 
@@ -66,14 +76,14 @@
 
     <div class="kpi-card">
       <div class="kpi-header">
-        <span class="kpi-title">SAVINGS</span>
+        <span class="kpi-title">SAVINGS RATE</span>
         <div class="kpi-icon-box icon-rose">
           <span class="material-symbols-outlined">savings</span>
         </div>
       </div>
-      <div class="kpi-value">{{ currency }}{{ savingsAmount | number:'1.2-2' }}</div>
+      <div class="kpi-value">{{ savingsRate }}%</div>
       <div class="kpi-trend text-muted">
-        <span>{{ savingsRate }}% savings rate</span>
+        <span>{{ monthlyIncome >= monthlyExpenses ? 'Healthy financial ratio' : 'Expenses exceed income' }}</span>
       </div>
     </div>
   </section>
@@ -87,30 +97,65 @@
       <!-- Spending Overview Wave Chart -->
       <section class="card-panel spending-card">
         <div class="panel-header">
-          <h2 class="panel-title">Spending Overview</h2>
-          <div class="period-dropdown">
-            <span>{{ currentMonth }}</span>
-            <span class="material-symbols-outlined drop-arrow">expand_more</span>
+          <div>
+            <h2 class="panel-title">Spending Overview</h2>
+            <span class="panel-subtitle">Weekly expenditure in {{ currentMonth }}</span>
+          </div>
+          <div class="active-badge-pill" *ngIf="activePoint">
+            {{ activePoint.week }} ({{ activePoint.label }}): <strong>{{ currency }}{{ activePoint.amount | number:'1.2-2' }}</strong>
           </div>
         </div>
 
         <div class="trend-chart-box">
-          <svg class="overview-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
+          <svg class="overview-svg" viewBox="0 0 600 135" preserveAspectRatio="none">
             <defs>
               <linearGradient id="spendingFill" x1="0" y1="0" x2="0" y2="100%">
-                <stop offset="0%" stop-color="#3b3bf5" stop-opacity="0.18" />
-                <stop offset="100%" stop-color="#3b3bf5" stop-opacity="0.01" />
+                <stop offset="0%" stop-color="#3b3bf5" stop-opacity="0.32" />
+                <stop offset="60%" stop-color="#3b3bf5" stop-opacity="0.10" />
+                <stop offset="100%" stop-color="#3b3bf5" stop-opacity="0.0" />
               </linearGradient>
             </defs>
+
+            <!-- Guide grid lines -->
+            <line x1="0" y1="35" x2="600" y2="35" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+            <line x1="0" y1="75" x2="600" y2="75" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+            <line x1="0" y1="110" x2="600" y2="110" stroke="rgba(148, 163, 184, 0.15)" stroke-dasharray="4 4" />
+
+            <!-- Gradient Area -->
             <path [attr.d]="trendAreaPath" fill="url(#spendingFill)" />
-            <path [attr.d]="trendPath" fill="none" stroke="#3b3bf5" stroke-width="4.5" stroke-linecap="round" />
+
+            <!-- Spline Line -->
+            <path [attr.d]="trendPath" fill="none" stroke="#3b3bf5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- Data Point Circles -->
+            <g *ngFor="let pt of weeklyPoints">
+              <circle
+                [attr.cx]="pt.x"
+                [attr.cy]="pt.y"
+                r="6"
+                fill="#ffffff"
+                stroke="#3b3bf5"
+                stroke-width="3"
+                class="chart-dot"
+                (mouseenter)="setActivePoint(pt)"
+                (mouseleave)="setActivePoint(null)"
+              >
+                <title>{{ pt.week }} ({{ pt.label }}): {{ currency }}{{ pt.amount | number:'1.2-2' }}</title>
+              </circle>
+            </g>
           </svg>
 
           <div class="x-axis-ticks">
-            <span>W1</span>
-            <span>W2</span>
-            <span>W3</span>
-            <span>W4</span>
+            <div 
+              *ngFor="let pt of weeklyPoints" 
+              class="tick-item" 
+              [class.highlight]="activePoint?.week === pt.week"
+              (mouseenter)="setActivePoint(pt)"
+              (mouseleave)="setActivePoint(null)"
+            >
+              <span class="tick-week">{{ pt.week }}</span>
+              <span class="tick-amt">{{ currency }}{{ pt.amount | number:'1.0-0' }}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -132,7 +177,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let item of recentTransactions">
+              <tr *ngFor="let item of filteredRecentTransactions">
                 <td>
                   <div class="item-name-group">
                     <div class="tx-badge-icon" [style.background]="item.iconBg" [style.color]="item.iconColor">
@@ -140,7 +185,7 @@
                     </div>
                     <div class="tx-desc-cell">
                       <strong class="tx-title">{{ item.name }}</strong>
-                      <span class="tx-sub">{{ item.category }}</span>
+                      <span class="tx-sub">{{ item.category }} • {{ item.method }}</span>
                     </div>
                   </div>
                 </td>
@@ -150,12 +195,13 @@
                     {{ item.amount > 0 ? '+' : '-' }}{{ currency }}{{ getAbs(item.amount) | number:'1.2-2' }}
                   </span>
                 </td>
-              <<!-- Inside <table class="recent-table"> <tbody> -->
-<tr *ngIf="recentTransactions.length === 0">
-  <td colspan="3" class="empty-notice-cell" style="text-align: center; padding: 36px 16px; color: #94a3b8;">
-    No transactions added yet.
-  </td>
-</tr>
+              </tr>
+              <tr *ngIf="filteredRecentTransactions.length === 0">
+                <td colspan="3" class="empty-notice-cell" style="text-align: center; padding: 36px 16px; color: #94a3b8;">
+                  <span *ngIf="searchQuery">No transactions match "{{ searchQuery }}".</span>
+                  <span *ngIf="!searchQuery">No transactions added yet.</span>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -176,7 +222,7 @@
           <div class="donut-wheel" [style.background]="donutGradient">
             <div class="donut-cutout">
               <span class="donut-total-val">{{ currency }}{{ monthlyExpenses | number:'1.0-0' }}</span>
-              <span class="donut-sub">Total</span>
+              <span class="donut-sub">Total Spent</span>
             </div>
           </div>
         </div>
@@ -187,7 +233,10 @@
               <span class="color-dot" [style.background-color]="cat.color"></span>
               <span class="cat-label">{{ cat.name }}</span>
             </div>
-            <span class="cat-pct">{{ cat.percentage }}%</span>
+            <div class="legend-right">
+              <span class="cat-amt">{{ currency }}{{ cat.amount | number:'1.0-0' }}</span>
+              <span class="cat-pct">({{ cat.percentage }}%)</span>
+            </div>
           </div>
           <div class="empty-legend" *ngIf="categoryBreakdown.length === 0">
             <span>No category expenses recorded</span>
@@ -199,6 +248,7 @@
       <section class="card-panel budget-card">
         <div class="panel-header">
           <h2 class="panel-title">Budget Overview</h2>
+          <a class="view-all-link" routerLink="/budgets">Manage</a>
         </div>
 
         <div class="budget-items-list">
