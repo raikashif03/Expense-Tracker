@@ -30,6 +30,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/Expense-Tracker/",
               "budgets": [
                 {
                   "type": "initial",
